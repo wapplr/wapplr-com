@@ -1,0 +1,40 @@
+{
+    "name": "wapplr-com",
+    "description": "Wapplr.com is a website for introducing Wapplr and even an example for how to use it.",
+    "license": "MIT",
+    "dependencies": {
+        "wapplr": "^1.0.0",
+        "wapplr-pwa": "^1.0.0",
+        "wapplr-react": "^1.0.0",
+        "wapplr-mongo": "^1.0.0",
+        "wapplr-posttypes": "^1.0.0",
+        "wapplr-graphql": "^1.0.0"
+    },
+    "devDependencies": {
+        "wapplr-cli": "^1.0.0"
+    },
+    "engines": {
+        "node": ">=12.0.0"
+    },
+    "browserslist": [
+        ">1%",
+        "last 4 versions",
+        "Firefox ESR",
+        "not ie < 9"
+    ],
+    "scripts": {
+        "wapplrcom start": "wapplr-cli start",
+        "wapplrcom build": "wapplr-cli build",
+        "wapplrcom clean": "wapplr-cli clean"
+    },
+    "version": "1.0.0",
+    "files": [
+        "dist/*"
+    ],
+    "main": "dist/server",
+    "browser": "dist/client",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/wapplr/wapplr-com.git"
+    }
+}
