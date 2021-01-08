@@ -33,18 +33,18 @@ export function getConfig(p = {}) {
 export default function createClient(p) {
     const {config} = getConfig(p);
     const wapp = p.wapp || wapplrClient({...p, config});
-    wapplrPwa({wapp, ...p, config});
-    wapplrReact({wapp, ...p});
-    setContents({wapp, ...p});
+
+    wapplrPwa({wapp});
+
+    wapplrReact({wapp});
+    setContents({wapp});
+
     return wapp;
 }
 
 export function createMiddleware(p = {}) {
 
-    // eslint-disable-next-line no-unused-vars
-    const {config} = getConfig(p);
     const wapp = p.wapp || createClient(p);
-
     const middlewares = [
         function wapplrComMiddleware(req, res, next) {
             createWapplrReactMiddleware({wapp})

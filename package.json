@@ -7,6 +7,7 @@
         "wapplr-graphql": "^1.0.0",
         "wapplr-mongo": "^1.0.0",
         "wapplr-posttypes": "^1.0.0",
+        "wapplr-authentication": "^1.0.0",
         "wapplr-pwa": "^1.0.0",
         "wapplr-react": "^1.0.0"
     },
@@ -27,7 +28,7 @@
         "wapplrcom build": "wapplr-cli build",
         "wapplrcom clean": "wapplr-cli clean"
     },
-    "version": "1.0.2",
+    "version": "1.0.3",
     "files": [
         "dist/*"
     ],

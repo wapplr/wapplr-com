@@ -1,10 +1,13 @@
 import wapplrServer from "wapplr";
 import wapplrMongo from "wapplr-mongo";
-import wapplrPosttypes from "wapplr-posttypes";
+import wapplrPostTypes from "wapplr-posttypes";
+import wapplrAuthentication from "wapplr-authentication";
 import wapplrGraphql, {createMiddleware as createWapplrGraphqlMiddleware} from "wapplr-graphql";
 import wapplrReact from "wapplr-react";
 
-import postType from "./postType";
+import postType from "./postTypes/post";
+import userType from "./postTypes/user";
+
 import setContents from "../common/setContents";
 import setHtml from "./setHtml";
 import bodyParser from "body-parser";
@@ -25,9 +28,9 @@ export function getConfig(p = {}) {
         ...serverConfig,
         icon: favicon,
         disableUseDefaultMiddlewares: true,
-        databaseConfig: {
-            mongoConnectionString: "mongodb://localhost/masked",
-        },
+        database: {
+            mongoConnectionString: "mongodb://localhost/wapplr-com",
+        }
     }
 
     return {
@@ -40,19 +43,30 @@ export function getConfig(p = {}) {
 }
 
 export default async function createServer(p = {}) {
+
     const {config} = getConfig(p);
     const wapp = p.wapp || wapplrServer({...p, config});
 
-    await wapplrMongo({wapp, ...p, config});
-    await wapplrPosttypes({wapp, ...p, config});
-    await postType({wapp, ...p});
-    wapplrGraphql({wapp, ...p, config});
-    wapplrReact({wapp, ...p, config});
+    wapplrMongo({wapp});
+    // eslint-disable-next-line no-unused-vars
+    const db = await wapp.server.database.addDatabase();
 
-    setContents({wapp, ...p, config});
-    setHtml({wapp, ...p, config});
+    wapplrPostTypes({wapp});
+    // eslint-disable-next-line no-unused-vars
+    const post = await postType({wapp});
+
+    wapplrAuthentication({wapp});
+    // eslint-disable-next-line no-unused-vars
+    const user = await userType({wapp});
+
+    wapplrGraphql({wapp});
+
+    wapplrReact({wapp});
+    setContents({wapp});
+    setHtml({wapp});
 
     return wapp;
+
 }
 
 export function createMiddleware(p = {}) {
@@ -62,11 +76,9 @@ export function createMiddleware(p = {}) {
     return async function wapplrComMiddleware(req, res, out) {
 
         if (!middlewares){
-            const {config} = getConfig(p);
             const wapp = p.wapp || await createServer(p);
-
             middlewares = [
-                createWapplrGraphqlMiddleware({wapp, ...p, config}),
+                createWapplrGraphqlMiddleware({wapp, ...p}),
             ]
         }
 
@@ -121,7 +133,7 @@ export async function run(p = defaultConfig) {
     app.use([
         wapp.server.middlewares.wapp,
         wapp.server.middlewares.static,
-        createMiddleware({wapp, ...p}),
+        createMiddleware({wapp}),
         ...Object.keys(wapp.server.middlewares).map(function (key){
             return (key === "wapp" && key === "static") ? function next(req, res, next) { return next(); } : wapp.server.middlewares[key];
         })
