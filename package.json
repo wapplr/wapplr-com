@@ -24,11 +24,11 @@
         "not ie < 9"
     ],
     "scripts": {
-        "wapplrcom start": "wapplr-cli start",
-        "wapplrcom build": "wapplr-cli build",
-        "wapplrcom clean": "wapplr-cli clean"
+        "wapplr-com start": "wapplr-cli start",
+        "wapplr-com build": "wapplr-cli build",
+        "wapplr-com clean": "wapplr-cli clean"
     },
-    "version": "1.0.3",
+    "version": "1.0.4",
     "files": [
         "dist/*"
     ],
