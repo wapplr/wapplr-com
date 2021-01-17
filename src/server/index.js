@@ -58,8 +58,9 @@ export default async function createServer(p = {}) {
     wapplrAuthentication({wapp});
     // eslint-disable-next-line no-unused-vars
     const user = await userType({wapp});
+    //console.log(user);
 
-    wapplrGraphql({wapp});
+    wapplrGraphql({wapp}).init();
 
     wapplrReact({wapp});
     setContents({wapp});
@@ -69,38 +70,12 @@ export default async function createServer(p = {}) {
 
 }
 
-export function createMiddleware(p = {}) {
+export async function createMiddleware(p = {}) {
 
-    let middlewares = null;
-
-    return async function wapplrComMiddleware(req, res, out) {
-
-        if (!middlewares){
-            const wapp = p.wapp || await createServer(p);
-            middlewares = [
-                createWapplrGraphqlMiddleware({wapp, ...p}),
-            ]
-        }
-
-        let index = 0;
-
-        async function next(err) {
-
-            if (middlewares[index]){
-                const func = middlewares[index];
-                index = index + 1;
-                return await func(req, res, (err) ? async function(){await next(err)} : next)
-            } else if (typeof out === "function") {
-                index = 0;
-                return await out(err);
-            }
-
-            return null;
-        }
-
-        return await next();
-
-    }
+    const wapp = p.wapp || await createServer(p);
+    return [
+        createWapplrGraphqlMiddleware({wapp, ...p}),
+    ]
 
 }
 
@@ -115,6 +90,7 @@ const defaultConfig = {
         }
     }
 }
+
 export async function run(p = defaultConfig) {
 
     const {config} = getConfig(p);
@@ -124,18 +100,27 @@ export async function run(p = defaultConfig) {
 
     const app = wapp.server.app;
 
-    if (!wapp.server.initalisedBodyParser){
+    if (!wapp.server.initializedBodyParser){
         app.use(bodyParser.urlencoded({extended: true}));
         app.use(bodyParser.json());
-        wapp.server.initalisedBodyParser = true;
+        Object.defineProperty(wapp.server, "initializedBodyParser", {
+            enumerable: false,
+            writable: false,
+            configurable: false,
+            value: true
+        })
     }
 
     app.use([
         wapp.server.middlewares.wapp,
         wapp.server.middlewares.static,
-        createMiddleware({wapp}),
+    ]);
+
+    app.use(await createMiddleware({wapp}));
+
+    app.use([
         ...Object.keys(wapp.server.middlewares).map(function (key){
-            return (key === "wapp" && key === "static") ? function next(req, res, next) { return next(); } : wapp.server.middlewares[key];
+            return (key === "wapp" || key === "static") ? function next(req, res, next) { return next(); } : wapp.server.middlewares[key];
         })
     ]);
 

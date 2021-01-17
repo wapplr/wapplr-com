@@ -28,7 +28,7 @@
         "wapplr-com build": "wapplr-cli build",
         "wapplr-com clean": "wapplr-cli clean"
     },
-    "version": "1.0.4",
+    "version": "1.0.5",
     "files": [
         "dist/*"
     ],

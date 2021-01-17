@@ -1,6 +1,7 @@
 import wapplrClient from "wapplr";
 import wapplrPwa from "wapplr-pwa";
-import wapplrReact, {createMiddleware as createWapplrReactMiddleware} from "wapplr-react";
+import wapplrReact from "wapplr-react";
+import wapplrGraphql from "wapplr-graphql";
 
 import setContents from "../common/setContents";
 
@@ -35,7 +36,7 @@ export default function createClient(p) {
     const wapp = p.wapp || wapplrClient({...p, config});
 
     wapplrPwa({wapp});
-
+    wapplrGraphql({wapp});
     wapplrReact({wapp});
     setContents({wapp});
 
@@ -43,36 +44,13 @@ export default function createClient(p) {
 }
 
 export function createMiddleware(p = {}) {
-
+    // eslint-disable-next-line no-unused-vars
     const wapp = p.wapp || createClient(p);
-    const middlewares = [
+    return [
         function wapplrComMiddleware(req, res, next) {
-            createWapplrReactMiddleware({wapp})
-            return next();
+            next()
         }
     ]
-
-    return function(req, res, out) {
-
-        let index = 0;
-
-        function next(err) {
-
-            if (middlewares[index]){
-                const func = middlewares[index];
-                index = index + 1;
-                return func(req, res, (err) ? function(){next(err)} : next)
-            } else if (typeof out === "function") {
-                index = 0;
-                return out(err);
-            }
-
-            return null;
-        }
-
-        return next();
-
-    }
 
 }
 
@@ -97,9 +75,11 @@ export function run(p = defaultConfig) {
 
     const app = wapp.client.app;
 
+    app.use(wapp.client.middlewares.wapp);
+
+    app.use(createMiddleware({wapp, ...p}));
+
     app.use([
-        wapp.client.middlewares.wapp,
-        createMiddleware({wapp, ...p}),
         ...Object.keys(wapp.client.middlewares).map(function (key){
             return (key === "wapp") ? function next(req, res, next) { return next(); } : wapp.client.middlewares[key];
         })
