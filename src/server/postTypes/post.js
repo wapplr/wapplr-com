@@ -3,7 +3,8 @@ export default async function post(p = {}) {
     const {wapp} = p;
 
     const titlePattern = /^.{1,250}$/;
-    const contentPattern = /^.{1,}$/;
+    const contentPattern = /^.{1,2500}$/;
+    const contentBriefPattern = /^.{1,500}$/;
 
     return await wapp.server.postTypes.getPostType({
         name: "post",
@@ -17,7 +18,12 @@ export default async function post(p = {}) {
                         required: true
                     }
                 },
-                subtitle: { type: String },
+                subtitle: {
+                    type: String,
+                    wapplr: {
+                        pattern: titlePattern,
+                    }
+                },
                 content: {
                     type: String,
                     wapplr: {
@@ -25,7 +31,12 @@ export default async function post(p = {}) {
                         required: true
                     }
                 },
-                contentBrief: { type: String },
+                contentBrief: {
+                    type: String,
+                    wapplr: {
+                        pattern: contentBriefPattern,
+                    }
+                },
             },
             requiredDataForStatus: {
                 title: { type: String },
