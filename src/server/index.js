@@ -5,15 +5,14 @@ import wapplrAuthentication from "wapplr-authentication";
 import wapplrGraphql, {createMiddleware as createWapplrGraphqlMiddleware} from "wapplr-graphql";
 import wapplrReact from "wapplr-react";
 
-import postType from "./postTypes/post";
-import userType from "./postTypes/user";
-
+import Head from "./components/Head";
 import setContents from "../common/setContents";
-import setHtml from "./setHtml";
-import bodyParser from "body-parser";
+import {getConfig as getCommonConfig} from "../common/config";
 import favicon from "./images/icon_192x192.png";
 
-import {getConfig as getCommonConfig} from "../common/config";
+import bodyParser from "body-parser";
+import nodeFetch from "node-fetch";
+import url from "url";
 
 export function getConfig(p = {}) {
 
@@ -47,24 +46,74 @@ export default async function createServer(p = {}) {
     const {config} = getConfig(p);
     const wapp = p.wapp || wapplrServer({...p, config});
 
+    wapp.requests.requestManager.fetch = async function (urlString, options) {
+        const absoluteUrl = (!url.parse(urlString).hostname) ?
+            wapp.request.protocol + "//" + wapp.request.hostname + urlString :
+            urlString;
+
+        return await nodeFetch(absoluteUrl, options);
+    };
+
     wapplrMongo({wapp});
-    // eslint-disable-next-line no-unused-vars
-    const db = await wapp.server.database.addDatabase();
-
     wapplrPostTypes({wapp});
-    // eslint-disable-next-line no-unused-vars
-    const post = await postType({wapp});
-
     wapplrAuthentication({wapp});
-    // eslint-disable-next-line no-unused-vars
-    const user = await userType({wapp});
-    //console.log(user);
+    wapplrReact({wapp});
+
+    const titlePattern = /^.{1,250}$/;
+    const contentPattern = /^.{1,2500}$/;
+    const contentBriefPattern = /^.{1,500}$/;
+
+    await wapp.server.postTypes.getPostType({
+        name: "post",
+        addIfThereIsNot: true,
+        config: {
+            schemaFields: {
+                title: {
+                    type: String,
+                    wapplr: {
+                        pattern: titlePattern,
+                        required: true
+                    }
+                },
+                subtitle: {
+                    type: String,
+                    wapplr: {
+                        pattern: titlePattern,
+                    }
+                },
+                content: {
+                    type: String,
+                    wapplr: {
+                        pattern: contentPattern,
+                        required: true
+                    }
+                },
+                contentBrief: {
+                    type: String,
+                    wapplr: {
+                        pattern: contentBriefPattern,
+                    }
+                },
+            },
+            requiredDataForStatus: {
+                title: { type: String },
+                content: { type: String },
+            },
+        }
+    })
+
+    await wapp.server.authentications.getAuthentication({
+        name: "user",
+        addIfThereIsNot: true,
+    })
 
     wapplrGraphql({wapp}).init();
 
-    wapplrReact({wapp});
+    wapp.contents.addComponent({
+        head: Head
+    })
+
     setContents({wapp});
-    setHtml({wapp});
 
     return wapp;
 

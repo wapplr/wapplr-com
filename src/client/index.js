@@ -31,11 +31,12 @@ export function getConfig(p = {}) {
 
 }
 
-export default function createClient(p) {
+export default async function createClient(p) {
     const {config} = getConfig(p);
     const wapp = p.wapp || wapplrClient({...p, config});
 
-    wapplrPwa({wapp});
+    await wapplrPwa({wapp});
+
     wapplrGraphql({wapp});
     wapplrReact({wapp});
     setContents({wapp});
@@ -43,9 +44,9 @@ export default function createClient(p) {
     return wapp;
 }
 
-export function createMiddleware(p = {}) {
+export async function createMiddleware(p = {}) {
     // eslint-disable-next-line no-unused-vars
-    const wapp = p.wapp || createClient(p);
+    const wapp = p.wapp || await createClient(p);
     return [
         function wapplrComMiddleware(req, res, next) {
             next()
@@ -66,10 +67,10 @@ const defaultConfig = {
     }
 }
 
-export function run(p = defaultConfig) {
+export async function run(p = defaultConfig) {
 
     const {config} = getConfig(p);
-    const wapp = createClient({...p, config });
+    const wapp = await createClient({...p, config });
     const globals = wapp.globals;
     const {DEV} = globals;
 
@@ -77,7 +78,7 @@ export function run(p = defaultConfig) {
 
     app.use(wapp.client.middlewares.wapp);
 
-    app.use(createMiddleware({wapp, ...p}));
+    app.use(await createMiddleware({wapp, ...p}));
 
     app.use([
         ...Object.keys(wapp.client.middlewares).map(function (key){

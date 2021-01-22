@@ -9,7 +9,8 @@
         "wapplr-posttypes": "^1.0.0",
         "wapplr-authentication": "^1.0.0",
         "wapplr-pwa": "^1.0.0",
-        "wapplr-react": "^1.0.0"
+        "wapplr-react": "^1.0.0",
+        "node-fetch": "^2.6.1"
     },
     "devDependencies": {
         "wapplr-cli": "^1.0.0"
@@ -28,7 +29,7 @@
         "wapplr-com build": "wapplr-cli build",
         "wapplr-com clean": "wapplr-cli clean"
     },
-    "version": "1.0.6",
+    "version": "1.0.8",
     "files": [
         "dist/*"
     ],
