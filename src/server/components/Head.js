@@ -5,20 +5,20 @@ import {WappContext} from "wapplr-react/dist/common/Wapp";
 
 export default function Head(props) {
 
-    const {wapp} = useContext(WappContext);
+    const {wapp, req, res} = useContext(WappContext);
+
+    const wappResponse = res.wappResponse;
 
     const config = wapp.server.config;
     const {siteName = "Wapplr"} = config;
-    const {state, content = {}} = wapp.response;
-    const res = (state && state.res) ? state.res : wapp.response;
-    const {statusCode = 200} = res;
+    const {content = {}, statusCode = 200} = wappResponse;
 
     let {title = "", description = ""} = content;
 
-    if (typeof title == "function") {title = title(wapp);}
+    if (typeof title == "function") {title = title({wapp, req, res});}
     title = `${(title) ? title : (statusCode === 404) ? "Not Found | " + siteName : "Untitled Page | " + siteName }`;
 
-    if (typeof description === "function") {description = description(wapp)}
+    if (typeof description === "function") {description = description({wapp, req, res})}
     description = (description) ? description : (title && title.split) ? title.split(" | ")[0] : title;
 
     return [
