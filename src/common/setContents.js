@@ -1,8 +1,23 @@
 import App from "./components/App";
+import titles from "./config/constants/titles";
+import routes from "./config/constants/routes";
 
 export default function setContents(p = {}) {
 
     const {wapp} = p;
+
+    function getTitle({wapp, req, res, title = titles.homeTitle}) {
+        const config = wapp.getTargetObject().config;
+        const {siteName = "Wapplr"} = config;
+        const {statusCode, statusMessage, errorMessage} = res.wappResponse;
+        if (statusCode === 404) {
+            title = statusMessage || "Not found";
+        }
+        if (statusCode === 500) {
+            title = errorMessage || statusMessage || "Internal Server Error";
+        }
+        return title + " | " + siteName;
+    }
 
     /*contents for home and some static page*/
 
@@ -10,7 +25,10 @@ export default function setContents(p = {}) {
         home: {
             render: App,
             description: "Home",
-            renderType: "react"
+            renderType: "react",
+            title: function (p) {
+                return getTitle({...p, title: titles.homeTitle})
+            }
         }
     })
 
@@ -26,25 +44,30 @@ export default function setContents(p = {}) {
     /*contents for user*/
 
     wapp.contents.add({
+        account: {
+            render: App,
+            renderType: "react",
+            title: function (p) {
+                return getTitle({...p, title: titles.accountTitle})
+            }
+        },
         user: {
             render: App,
-            title: "User",
-            renderType: "react"
+            renderType: "react",
+            title: function (p) {
+                return getTitle({...p, title: titles.userTitle})
+            }
         },
-        login: {
-            render: App,
-            title: "Login",
-            renderType: "react"
-        }
     })
 
     wapp.router.add([
-        {path: "/account", contentName: "login"},
-        {path: "/account/:accountPage", contentName: "login"},
-        {path: "/account/*", contentName: "login"},
-        {path: "/user/:_id", contentName: "user"},
-        {path: "/user/:_id/:userPage", contentName: "user"},
-        {path: "/user/:_id/*", contentName: "user"},
+        {path: routes.accountRoute, contentName: "account"},
+        {path: routes.accountRoute+"/:page", contentName: "account"},
+        {path: routes.accountRoute+"/*", contentName: "account"},
+
+        {path: routes.userRoute+"/:_id", contentName: "user"},
+        {path: routes.userRoute+"/:_id/:page", contentName: "user"},
+        {path: routes.userRoute+"/:_id/*", contentName: "user"},
     ])
 
     /*contents for post*/
@@ -52,14 +75,16 @@ export default function setContents(p = {}) {
     wapp.contents.add({
         post: {
             render: App,
-            title: "Post",
-            renderType: "react"
+            renderType: "react",
+            title: function (p) {
+                return getTitle({...p, title: titles.postTitle})
+            }
         }
     })
 
     wapp.router.add([
         {path: "/post/:_id", contentName: "post"},
-        {path: "/post/:_id/:postPage", contentName: "post"},
+        {path: "/post/:_id/:page", contentName: "post"},
         {path: "/post/:_id/*", contentName: "post"},
     ])
 

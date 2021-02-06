@@ -2,6 +2,7 @@ import wapplrClient from "wapplr";
 import wapplrPwa from "wapplr-pwa";
 import wapplrReact from "wapplr-react";
 import wapplrGraphql from "wapplr-graphql";
+import wapplrAuthentication from "wapplr-authentication";
 
 import setContents from "../common/setContents";
 
@@ -37,9 +38,18 @@ export default async function createClient(p) {
 
     await wapplrPwa({wapp});
 
+    wapplrAuthentication({wapp});
     wapplrGraphql({wapp});
     wapplrReact({wapp});
     setContents({wapp});
+
+    const authSettings = {
+        name: "user",
+        addIfThereIsNot: true
+    };
+
+    wapp.client.authentications.getAuthentication(authSettings);
+    //wapp.client.authentications.getAuthentication({...authSettings, name:"author"});
 
     return wapp;
 }

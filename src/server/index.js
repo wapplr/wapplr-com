@@ -7,6 +7,7 @@ import wapplrReact from "wapplr-react";
 
 import Head from "./components/Head";
 import setContents from "../common/setContents";
+import routes from "../common/config/constants/routes";
 import {getConfig as getCommonConfig} from "../common/config";
 import favicon from "./images/icon_192x192.png";
 
@@ -102,10 +103,36 @@ export default async function createServer(p = {}) {
         }
     })
 
-    await wapp.server.authentications.getAuthentication({
+    const authSettings = {
         name: "user",
         addIfThereIsNot: true,
-    })
+        admin: {
+            name: {
+                first: "Admin"
+            },
+            email: "admin@wapplr.com",
+            password: "123456Ab"
+        },
+        config: {
+            disableUseSessionMiddleware: true,
+            mailer: {
+                send: async function(type, data, input) {
+                    const {req} = input;
+                    if (type === "forgotPassword") {
+                        const hostname = req.wappRequest.hostname;
+                        const protocol = req.wappRequest.protocol;
+                        const resetPasswordRoute = routes.accountRoute + "/resetpassword";
+                        const user = data;
+                        const url = protocol + "://" + hostname + resetPasswordRoute + "/?hash=" + encodeURIComponent(user.passwordRecoveryKey) + "&email=" + encodeURIComponent(user.email) + ""
+                        console.log(url);
+                    }
+                }
+            }
+        }
+    }
+
+    await wapp.server.authentications.getAuthentication(authSettings);
+    //await wapp.server.authentications.getAuthentication({...authSettings, name:"author"});
 
     wapplrGraphql({wapp}).init();
 
@@ -123,6 +150,16 @@ export async function createMiddleware(p = {}) {
 
     const wapp = p.wapp || await createServer(p);
     return [
+        function createFetch(req, res, next) {
+            wapp.requests.requestManager.fetch = async function (urlString, options) {
+                const absoluteUrl = (!url.parse(urlString).hostname) ?
+                    req.wappRequest.protocol + "://" + req.wappRequest.hostname + urlString :
+                    urlString;
+                return await nodeFetch(absoluteUrl, options);
+            };
+            next();
+        },
+        ...wapp.server.session.getSessionMiddleware(),
         createWapplrGraphqlMiddleware({wapp, ...p}),
     ]
 

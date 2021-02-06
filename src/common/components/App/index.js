@@ -1,11 +1,17 @@
 import React, {useContext, useState, useEffect} from "react";
 import getUtils from "wapplr-react/dist/common/Wapp/getUtils";
 import {WappContext} from "wapplr-react/dist/common/Wapp";
-import Log from "wapplr-react/dist/common/Log";
+import AppContext from "./context";
 
 import Template from "../Template";
+import Account from "../Account";
 
-import style from "./app.css";
+import style from "./style.css";
+
+import messages from "../../config/constants/messages";
+import labels from "../../config/constants/labels";
+import titles from "../../config/constants/titles";
+import routes from "../../config/constants/routes";
 
 export default function App(props) {
 
@@ -18,8 +24,11 @@ export default function App(props) {
 
     const [url, setUrl] = useState(utils.getRequestUrl());
 
-    function onLocationChange(newUrl){
+    async function onLocationChange(newUrl){
         if (url !== newUrl){
+            if (newUrl === "/logout"){
+                return await utils.logout();
+            }
             setUrl(newUrl);
         }
     }
@@ -32,10 +41,12 @@ export default function App(props) {
     }, [url])
 
     return (
-        <div className={style.app}>
-            <Template>
-                <Log Parent={null} />
-            </Template>
-        </div>
+        <AppContext.Provider value={{messages, labels, titles, routes}}>
+            <div className={style.app}>
+                <Template url={url}>
+                    {(url.startsWith(routes.accountRoute)) ? <Account url={url}/> : null}
+                </Template>
+            </div>
+        </AppContext.Provider>
     );
 }
