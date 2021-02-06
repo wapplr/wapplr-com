@@ -179,6 +179,9 @@ const defaultConfig = {
 
 export async function run(p = defaultConfig) {
 
+    const {env} = process;
+    env.NODE_ENV = process.env.NODE_ENV;
+
     const {config} = getConfig(p);
     const wapp = await createServer({...p, config});
     const globals = wapp.globals;

@@ -43,17 +43,17 @@ export function withMaterialTheme(themeOptions = {}, ComposedComponent) {
             if (wapp.target === "node"){
 
                 return this.sheets.collect(
-                    <ThemeProvider theme={theme}>
-                        <ComposedComponent {...this.props} />
-                    </ThemeProvider>
+                        <ThemeProvider theme={theme}>
+                            <ComposedComponent {...this.props} />
+                        </ThemeProvider>
                 )
 
             }
 
             return (
-                <ThemeProvider theme={theme}>
-                    <ComposedComponent {...this.props} />
-                </ThemeProvider>
+                    <ThemeProvider theme={theme}>
+                        <ComposedComponent {...this.props} />
+                    </ThemeProvider>
             )
 
         }
