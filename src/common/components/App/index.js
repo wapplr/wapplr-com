@@ -26,9 +26,6 @@ export default function App(props) {
 
     async function onLocationChange(newUrl){
         if (url !== newUrl){
-            if (newUrl === "/logout"){
-                return await utils.logout();
-            }
             setUrl(newUrl);
         }
     }
