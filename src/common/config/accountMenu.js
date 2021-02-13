@@ -44,6 +44,13 @@ const accountMenu = [
         Icon: EmailIcon
     },
     {
+        name: menus.changePassword, href:"/changepassword",
+        role: function (p) {
+            return p?.user?._id;
+        },
+        Icon: VpnKeyIcon
+    },
+    {
         name: menus.forgotPasswordMenu, href:"/forgotpassword",
         Icon: VpnKeyIcon
     },

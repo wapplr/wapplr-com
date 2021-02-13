@@ -213,7 +213,7 @@ class Form extends React.Component {
                     }
                 }
 
-                parent[lastKey] = (data.value) ? data.value : props.formData[key].value
+                parent[lastKey] = (data.value) ? data.value : (data.required) ? props.formData[key].default : null;
             }
             return a;
         }, {})

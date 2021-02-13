@@ -11,7 +11,7 @@ import materialStyle from "./materialStyle";
 import style from "./style.css";
 import AccountContext from "../context";
 
-function ChangeData(props) {
+function ChangePassword(props) {
 
     const accountContext = useContext(AccountContext);
     const {user, name} = accountContext;
@@ -24,12 +24,12 @@ function ChangeData(props) {
     const {wapp} = context;
 
     async function onSubmit(e, formData) {
-        return await utils.sendRequest({requestName: name+"Save", args: formData, redirect: null });
+        return await utils.sendRequest({requestName: name+"ChangePassword", args: formData, redirect: null });
     }
 
     let formDataFromResolvers = {};
     try {
-        formDataFromResolvers = utils.getGlobalState().res.graphql.mutation[name+"Save"].formData;
+        formDataFromResolvers = utils.getGlobalState().res.graphql.mutation[name+"ChangePassword"].formData;
     } catch (e){}
 
     if (user?._id){
@@ -37,16 +37,11 @@ function ChangeData(props) {
         formDataFromResolvers._id.disabled = true;
     }
 
-    if (user?.name?.first){
-        formDataFromResolvers["record.name.first"].value = user?.name?.first;
-    }
-
-    if (user?.name?.last){
-        formDataFromResolvers["record.name.last"].value = user?.name?.last;
-    }
-
     const formData = {
         ...formDataFromResolvers,
+        submit: {
+            label: appContext.labels.changePasswordSubmitLabel
+        }
     }
 
     wapp.styles.use(style);
@@ -56,13 +51,13 @@ function ChangeData(props) {
             formData={formData}
             onSubmit={onSubmit}
             successMessage={
-                appContext.messages.changeDataSuccessMessage
+                appContext.messages.changePasswordSuccessMessage
             }
         />
     )
 }
 
-const WappComponent = withWapp(ChangeData);
+const WappComponent = withWapp(ChangePassword);
 
 const StyledComponent = withMaterialStyles(materialStyle, WappComponent);
 

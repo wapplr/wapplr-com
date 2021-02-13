@@ -32,6 +32,7 @@ import ForgotPassword from "./ForgotPassword";
 import ResetPassword from "./ResetPassword";
 import ChangeData from "./ChangeData";
 import ChangeEmail from "./ChangeEmail";
+import ChangePassword from "./ChangePassword";
 
 function Content(props) {
 
@@ -49,6 +50,8 @@ function Content(props) {
                 return ChangeData;
             case "changeemail":
                 return ChangeEmail;
+            case "changepassword":
+                return ChangePassword;
             default:
                 return Profile;
         }

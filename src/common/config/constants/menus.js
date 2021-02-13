@@ -4,6 +4,7 @@ const menus = {
     myProfileMenu: "My profile",
     changeData: "Change data",
     changeEmail: "Change email",
+    changePassword: "Change password",
     forgotPasswordMenu: "Forgot password",
     logoutMenu: "Logout",
     homeMenu: "Home",
