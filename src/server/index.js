@@ -118,12 +118,26 @@ export default async function createServer(p = {}) {
             mailer: {
                 send: async function(type, data, input) {
                     const {req} = input;
+
+                    const hostname = req.wappRequest.hostname;
+                    const protocol = req.wappRequest.protocol;
+
+                    if (type === "signup"){
+                        const emailConfirmationRoute = routes.accountRoute + "/emailconfirmation";
+                        const user = data;
+                        const url = protocol + "://" + hostname + emailConfirmationRoute + "/?hash=" + encodeURIComponent(user.emailConfirmationKey) + "&email=" + encodeURIComponent(user.email) + ""
+                        console.log(url);
+                    }
                     if (type === "forgotPassword") {
-                        const hostname = req.wappRequest.hostname;
-                        const protocol = req.wappRequest.protocol;
                         const resetPasswordRoute = routes.accountRoute + "/resetpassword";
                         const user = data;
                         const url = protocol + "://" + hostname + resetPasswordRoute + "/?hash=" + encodeURIComponent(user.passwordRecoveryKey) + "&email=" + encodeURIComponent(user.email) + ""
+                        console.log(url);
+                    }
+                    if (type === "emailConfirmation"){
+                        const emailConfirmationRoute = routes.accountRoute + "/emailconfirmation";
+                        const user = data;
+                        const url = protocol + "://" + hostname + emailConfirmationRoute + "/?hash=" + encodeURIComponent(user.emailConfirmationKey) + "&email=" + encodeURIComponent(user.email) + ""
                         console.log(url);
                     }
                 }

@@ -1,7 +1,8 @@
 import AccountCircleIcon from "@material-ui/icons/AccountCircle";
 import PersonAddIcon from "@material-ui/icons/PersonAdd";
 import ExitToAppIcon from "@material-ui/icons/ExitToApp";
-import VpnKeyIcon from "@material-ui/icons/VpnKey";
+import HelpIcon from '@material-ui/icons/Help';
+import LockIcon from '@material-ui/icons/Lock';
 import PersonIcon from '@material-ui/icons/Person';
 import EmailIcon from "@material-ui/icons/Email";
 
@@ -44,15 +45,22 @@ const accountMenu = [
         Icon: EmailIcon
     },
     {
+        name: menus.emailConfirmation, href:"/emailconfirmation",
+        role: function (p) {
+            return p?.user?._id && !p?.user?.emailConfirmed;
+        },
+        Icon: EmailIcon
+    },
+    {
         name: menus.changePassword, href:"/changepassword",
         role: function (p) {
             return p?.user?._id;
         },
-        Icon: VpnKeyIcon
+        Icon: LockIcon
     },
     {
         name: menus.forgotPasswordMenu, href:"/forgotpassword",
-        Icon: VpnKeyIcon
+        Icon: HelpIcon
     },
     {
         name: menus.logoutMenu, href:"/logout",

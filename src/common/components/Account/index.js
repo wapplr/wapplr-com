@@ -33,6 +33,7 @@ import ResetPassword from "./ResetPassword";
 import ChangeData from "./ChangeData";
 import ChangeEmail from "./ChangeEmail";
 import ChangePassword from "./ChangePassword";
+import EmailConfirmation from "./EmailConfirmation";
 
 function Content(props) {
 
@@ -52,6 +53,8 @@ function Content(props) {
                 return ChangeEmail;
             case "changepassword":
                 return ChangePassword;
+            case "emailconfirmation":
+                return EmailConfirmation;
             default:
                 return Profile;
         }
@@ -65,6 +68,8 @@ function Content(props) {
                 return ForgotPassword;
             case "resetpassword":
                 return ResetPassword;
+            case "emailconfirmation":
+                return EmailConfirmation;
             default:
                 return Login;
         }
@@ -165,8 +170,16 @@ function Account(props) {
             return (!user) ? appContext.titles.loginTitle : appContext.titles.logoutTitle;
         }
 
+        if (page === "resetpassword") {
+            return appContext.titles.resetPasswordTitle;
+        }
+
         if (page === "forgotpassword") {
             return appContext.titles.forgotPasswordTitle;
+        }
+
+        if (page === "emailconfirmation") {
+            return appContext.titles.emailConfirmationTitle;
         }
 
         let title = res.wappResponse.content.title;
