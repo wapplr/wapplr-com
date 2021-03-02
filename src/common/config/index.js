@@ -1,6 +1,3 @@
-import mainMenu from "./mainMenu";
-import accountMenu from "./accountMenu";
-
 export function getConfig(p = {}) {
 
     const {config = {}} = p;
@@ -14,8 +11,6 @@ export function getConfig(p = {}) {
         ...commonConfig,
         siteName: "Wapplr.com",
         description: "Wapplr.com is a website for introducing Wapplr and even an example for how to use it.",
-        mainMenu: mainMenu,
-        accountMenu: accountMenu,
         graphql: {
             route: (DEV) ? "/graphql" : "/g" + WAPP
         }

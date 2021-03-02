@@ -30,7 +30,7 @@ function EmailConfirmation(props) {
 
     async function onSubmit(e, formData) {
         if (type === "confirmation"){
-            return await utils.sendRequest({requestName: name+"EmailConfirmation", args: formData, redirect: {pathname: parentRoute, search:"", hash:""}, timeOut:2000 });
+            return await utils.sendRequest({requestName: name+"EmailConfirmation", args: formData, redirect: {pathname: parentRoute, search:"", hash:""}, timeOut:1000 });
         } else if (type === "sendagain") {
             return await utils.sendRequest({requestName: name+"EmailConfirmationSendAgain", args: formData});
         }
@@ -46,26 +46,26 @@ function EmailConfirmation(props) {
             formDataFromResolvers = utils.getGlobalState().res.graphql.mutation[name+"EmailConfirmation"].formData;
         } catch (e){}
 
-        if (query.hash && formDataFromResolvers.emailConfirmationKey){
-            formDataFromResolvers.emailConfirmationKey.value = query.hash;
-            formDataFromResolvers.emailConfirmationKey.disabled = true;
-        }
-
-        if (query.email && formDataFromResolvers.email){
-            formDataFromResolvers.email.value = query.email;
-            formDataFromResolvers.email.disabled = true;
-        }
-
-        if (user?._id && user?.email && formDataFromResolvers.email){
-            formDataFromResolvers.email.value = user.email;
-            formDataFromResolvers.email.disabled = true;
-        }
-
         formData = {
             ...formDataFromResolvers,
             submit: {
                 label: appContext.labels.emailConfirmationSubmitLabel
             }
+        }
+
+        if (query.hash && formData.emailConfirmationKey){
+            formData.emailConfirmationKey.value = query.hash;
+            formData.emailConfirmationKey.disabled = true;
+        }
+
+        if (query.email && formData.email){
+            formData.email.value = query.email;
+            formData.email.disabled = true;
+        }
+
+        if (user?._id && user?.email && formData.email){
+            formData.email.value = user.email;
+            formData.email.disabled = true;
         }
 
     }
@@ -76,16 +76,16 @@ function EmailConfirmation(props) {
             formDataFromResolvers = utils.getGlobalState().res.graphql.mutation[name+"EmailConfirmationSendAgain"].formData;
         } catch (e){}
 
-        if (user?._id){
-            formDataFromResolvers._id.value = user._id;
-            formDataFromResolvers._id.disabled = true;
-        }
-
         formData = {
             ...formDataFromResolvers,
             submit: {
                 label: appContext.labels.emailConfirmationSendAgainSubmitLabel
             }
+        }
+
+        if (user?._id){
+            formData._id.value = user._id;
+            formData._id.disabled = true;
         }
 
     }

@@ -5,12 +5,13 @@ import AccountCircleIcon from "@material-ui/icons/AccountCircle";
 import GitHubIcon from "@material-ui/icons/GitHub";
 import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 
-import Avatar from "../components/Avatar/me";
-import getUserName from "../utils/getUserName";
-import menus from "./constants/menus";
-import routes from "./constants/routes";
+import Avatar from "../../components/Avatar/me";
+import getUserName from "../../utils/getUserName";
+import menus from "../../config/constants/menus";
+import routes from "../../config/constants/routes";
+import PostAddIcon from "@material-ui/icons/PostAdd";
 
-const mainMenu = [
+const menu = [
     {
         name: function (p) {
             if (!p?.user?._id) {
@@ -40,6 +41,14 @@ const mainMenu = [
         Icon: CodeIcon
     },
     {
+        name: menus.newMenu,
+        href: routes.postRoute + "/new",
+        role: function (p) {
+            return (p?.user?._id);
+        },
+        Icon: PostAddIcon
+    },
+    {
         name: menus.loginMenu,
         href: routes.accountRoute + "/login",
         role: function (p) {
@@ -63,4 +72,4 @@ const mainMenu = [
     },
 ];
 
-export default mainMenu;
+export default menu;

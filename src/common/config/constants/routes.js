@@ -1,6 +1,7 @@
 const routes = {
     accountRoute: "/account",
-    userRoute: "/user"
+    userRoute: "/user",
+    postRoute: "/post"
 }
 
 export default routes;

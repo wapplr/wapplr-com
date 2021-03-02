@@ -5,7 +5,23 @@ const labels = {
     changeEmailSubmitLabel: "Change email",
     changePasswordSubmitLabel: "Change password",
     emailConfirmationSubmitLabel: "Confirm email",
-    emailConfirmationSendAgainSubmitLabel: "Send confirmation key to new email address again"
+    emailConfirmationSendAgainSubmitLabel: "Send confirmation key to new email address again",
+    postTitleLabel: "Title",
+    postSubtitleLabel: "Subtitle",
+    postContentLabel: "Content",
+    newPostSubmitLabel: "Save",
+    savePostSubmitLabel: "Save",
+    restorePostSubmitLabel: "Restore",
+    notFoundButtonBack: "Previous page",
+    notFoundButtonHome: "Home page",
+    notFoundButtonLogin: "Login",
+    notFoundButtonSignup: "Signup",
+    cancelText: "Cancel",
+    deleteText: "Delete",
+    banText: "Ban",
+    approveText: "Approve",
+    markText: "Mark",
+    removeMarkText: "Remove mark",
 };
 
 export default labels;

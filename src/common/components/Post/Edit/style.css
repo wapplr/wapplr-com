@@ -1,0 +1,5 @@
+.edit{}
+
+.edit textarea{
+    overflow-x: hidden!important;
+}

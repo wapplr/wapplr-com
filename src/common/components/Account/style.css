@@ -11,3 +11,9 @@
     min-height: 128px;
     padding: 32px;
 }
+
+.titleContainer {
+    width: 100%;
+    overflow: hidden
+}
+.title {}

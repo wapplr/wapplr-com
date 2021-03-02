@@ -11,7 +11,14 @@ const menus = {
     homeMenu: "Home",
     gettingStartedMenu: "Getting started",
     apiReferenceMenu: "Api reference",
-    gitHubMenu: "GitHub"
+    gitHubMenu: "GitHub",
+    newMenu: "New",
+    editMenu: "Edit",
+    deleteMenu: "Delete",
+    banMenu: "Ban",
+    approveMenu: "Approve",
+    featuredMenu: "Mark featured",
+    removeFeaturedMenu: "Remove featured"
 }
 
 export default menus;

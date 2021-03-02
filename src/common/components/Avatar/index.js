@@ -16,7 +16,7 @@ function Avatar(props) {
     const context = useContext(WappContext);
     // eslint-disable-next-line no-unused-vars
     const utils = getUtils(context);
-    const {subscribe, materialStyle, user, ...rest} = props;
+    const {subscribe, materialStyle, user, size = "list", ...rest} = props;
 
     const {wapp} = context;
 
@@ -33,8 +33,9 @@ function Avatar(props) {
             className={clsx(
                 style.avatar,
                 materialStyle.avatar,
-                {[materialStyle.small]: false},
-                {[materialStyle.list]: true}
+                {[materialStyle.small]: (size === "small")},
+                {[materialStyle.list]: (size === "list")},
+                {[materialStyle.big]: (size === "big")}
             )}
             {...rest}
         />

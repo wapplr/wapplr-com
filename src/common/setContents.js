@@ -51,41 +51,54 @@ export default function setContents(p = {}) {
                 return getTitle({...p, title: titles.accountTitle})
             }
         },
-        user: {
-            render: App,
-            renderType: "react",
-            title: function (p) {
-                return getTitle({...p, title: titles.userTitle})
-            }
-        },
     })
 
     wapp.router.add([
         {path: routes.accountRoute, contentName: "account"},
         {path: routes.accountRoute+"/:page", contentName: "account"},
         {path: routes.accountRoute+"/*", contentName: "account"},
-
-        {path: routes.userRoute+"/:_id", contentName: "user"},
-        {path: routes.userRoute+"/:_id/:page", contentName: "user"},
-        {path: routes.userRoute+"/:_id/*", contentName: "user"},
     ])
 
     /*contents for post*/
+
+    let reqUser = null;
 
     wapp.contents.add({
         post: {
             render: App,
             renderType: "react",
             title: function (p) {
-                return getTitle({...p, title: titles.postTitle})
+                const wappResponse = p.res.wappResponse;
+                const state = wappResponse.store.getState();
+                const post = state.res.responses?.postFindById;
+                const route = wappResponse.route;
+                const {path, params} = route;
+                let title = (path === routes.postRoute+"/new") ? titles.newPostTitle : titles.postTitle;
+                if (post && params._id === post._id && post.title){
+                    title = (params.page === "edit") ? titles.editPostTitle + " | " + post.title : post.title;
+                }
+                return getTitle({...p, title})
+            },
+            request: async function ({wapp, req, res}) {
+                const wappResponse = res.wappResponse;
+                const args = wappResponse.route.params;
+                const state = wappResponse.store.getState();
+                const responses = state.res.responses || {};
+                if ((args._id && typeof responses.postFindById == "undefined") ||
+                    (args._id && responses.postFindById && responses.postFindById._id !== args._id) ||
+                    (reqUser?._id !== req.wappRequest.user?._id)) {
+                    reqUser = req.wappRequest.user;
+                    await wapp.requests.send({requestName: "postFindById", args: {_id: args._id}, req, res});
+                }
             }
         }
     })
 
     wapp.router.add([
-        {path: "/post/:_id", contentName: "post"},
-        {path: "/post/:_id/:page", contentName: "post"},
-        {path: "/post/:_id/*", contentName: "post"},
+        {path: routes.postRoute, contentName: "post"},
+        {path: routes.postRoute+"/new", contentName: "post"},
+        {path: routes.postRoute+"/:_id", contentName: "post"},
+        {path: routes.postRoute+"/:_id/:page", contentName: "post"},
     ])
 
 }

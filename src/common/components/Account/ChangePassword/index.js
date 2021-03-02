@@ -32,16 +32,16 @@ function ChangePassword(props) {
         formDataFromResolvers = utils.getGlobalState().res.graphql.mutation[name+"ChangePassword"].formData;
     } catch (e){}
 
-    if (user?._id){
-        formDataFromResolvers._id.value = user._id;
-        formDataFromResolvers._id.disabled = true;
-    }
-
     const formData = {
         ...formDataFromResolvers,
         submit: {
             label: appContext.labels.changePasswordSubmitLabel
         }
+    }
+
+    if (user?._id){
+        formData._id.value = user._id;
+        formData._id.disabled = true;
     }
 
     wapp.styles.use(style);

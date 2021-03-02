@@ -5,7 +5,18 @@
     overflow-y: hidden;
     min-height: 100vh;
     max-width: 100vw;
-    padding-top: 64px;
+}
+
+.page > .pagePaddingTop{
+}
+
+.page > .pageContent{
+    height: auto;
+    min-height: calc(100vh - 96px);
+    display: flex;
+    width: 100%;
+    position: relative;
+    padding: 16px;
 }
 
 .logo {
@@ -39,4 +50,8 @@
     text-align: center;
     user-select: none;
     font-weight: bold;
+}
+
+a:visited {
+    color: inherit;
 }

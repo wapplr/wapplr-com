@@ -23,10 +23,11 @@ import CloseIcon from '@material-ui/icons/Close';
 import {storage} from "../../utils/localStorage";
 
 import {withMaterialTheme, withMaterialStyles} from "./withMaterial";
-import materialTheme from "./materialTheme";
+import {materialTheme, materialMediaQuery} from "./materialTheme";
 import style from "./style.css";
 import materialStyle from "./materialStyle";
 
+import menu from "./menu";
 
 function Template(props) {
 
@@ -44,7 +45,7 @@ function Template(props) {
     const utils = getUtils(context);
 
     const {wapp} = context;
-    const {siteName = "Wapplr", mainMenu = []} = wapp.config;
+    const {siteName = "Wapplr"} = wapp.config;
     const copyright = `${siteName} ${new Date().getFullYear()} ©`;
 
     wapp.styles.use(style);
@@ -92,6 +93,10 @@ function Template(props) {
         const inner = !(target === "_blank" || (href && href.slice(0,7) === "http://") || (href && href.slice(0,8) === "https://"));
 
         if (inner){
+
+            if (narrow) {
+                handleDrawerClose();
+            }
 
             wapp.client.history.push({
                 search:"",
@@ -176,7 +181,7 @@ function Template(props) {
                     <div className={materialStyle.toolbar} />
                     <Divider />
                     <List>
-                        {[...mainMenu.map(function (menu, key) {
+                        {[...menu.map(function (menu, key) {
 
                             const target = menu.target || "self";
                             const href = menu.href;
@@ -222,8 +227,11 @@ function Template(props) {
                 onClick={handleDrawerClose}
             />
             <main className={materialStyle.content}>
-                <div className={clsx(materialStyle.page, style.page)}>
-                    {children}
+                <div className={style.page}>
+                    <div className={clsx(style.pagePaddingTop, materialStyle.pagePaddingTop)} />
+                    <div className={style.pageContent}>
+                        {children}
+                    </div>
                 </div>
                 <footer className={style.footer}>
                     <div className={style.footerOneColumn}>
@@ -246,6 +254,11 @@ const WappComponent = withWapp(Template);
 
 const StyledComponent = withMaterialStyles(materialStyle, WappComponent);
 
-const ThemedComponent = withMaterialTheme(materialTheme, StyledComponent);
+const ThemedComponent = withMaterialTheme(
+    {
+        theme: materialTheme,
+        mediaQuery: materialMediaQuery},
+    StyledComponent
+);
 
 export default ThemedComponent;

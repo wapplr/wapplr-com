@@ -13,17 +13,22 @@ import AccountContext from "../context";
 function Signup(props) {
 
     const accountContext = useContext(AccountContext);
-    const {user, name} = accountContext;
+
+    // eslint-disable-next-line no-unused-vars
+    const {user, parentRoute, name} = accountContext;
 
     const context = useContext(WappContext);
     const utils = getUtils(context);
 
+    // eslint-disable-next-line no-unused-vars
     const {materialStyle} = props;
 
-    const {wapp} = context;
+    const {wapp, req} = context;
+
+    const query = req.wappRequest.query;
 
     async function onSubmit(e, formData) {
-        return await utils.signup({requestName: name+"Signup", args: formData, redirect: null});
+        return await utils.signup({requestName: name+"Signup", args: formData, redirect: {pathname: query.redirect || parentRoute, search:"", hash:""}});
     }
 
     let formDataFromResolvers = {};

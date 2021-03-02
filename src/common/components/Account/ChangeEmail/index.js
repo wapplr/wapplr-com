@@ -32,20 +32,20 @@ function ChangeData(props) {
         formDataFromResolvers = utils.getGlobalState().res.graphql.mutation[name+"ChangeEmail"].formData;
     } catch (e){}
 
-    if (user?._id){
-        formDataFromResolvers._id.value = user._id;
-        formDataFromResolvers._id.disabled = true;
-    }
-
-    if (user?.email){
-        formDataFromResolvers["email"].value = user?.email;
-    }
-
     const formData = {
         ...formDataFromResolvers,
         submit: {
             label: appContext.labels.changeEmailSubmitLabel
         }
+    }
+
+    if (user?._id){
+        formData._id.value = user._id;
+        formData._id.disabled = true;
+    }
+
+    if (user?.email){
+        formData["email"].value = user?.email;
     }
 
     wapp.styles.use(style);

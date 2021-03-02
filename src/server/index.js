@@ -8,12 +8,20 @@ import wapplrReact from "wapplr-react";
 import Head from "./components/Head";
 import setContents from "../common/setContents";
 import routes from "../common/config/constants/routes";
+import labels from "../common/config/constants/labels";
+import messages from "../common/config/constants/messages";
 import {getConfig as getCommonConfig} from "../common/config";
 import favicon from "./images/icon_192x192.png";
 
 import bodyParser from "body-parser";
 import nodeFetch from "node-fetch";
 import url from "url";
+
+import getDefaultStatusManager from "../common/config/statuses";
+import getPostStatusManager from "../common/config/statuses/post";
+import fs from "fs";
+import path from "path";
+import crypto from "crypto";
 
 export function getConfig(p = {}) {
 
@@ -23,6 +31,7 @@ export function getConfig(p = {}) {
     const commonConfig = getCommonConfig(p).config;
 
     const common = {...commonConfig.common}
+    const globals = {...commonConfig.globals};
 
     const server = {
         ...serverConfig,
@@ -31,6 +40,33 @@ export function getConfig(p = {}) {
         database: {
             mongoConnectionString: "mongodb://localhost/wapplr-com",
         }
+    }
+
+    const dirname = globals.ROOT || __dirname;
+    const credentialsFolder = "secure/";
+
+    let secret = null;
+
+    try {
+        if (fs.existsSync(path.resolve(dirname, credentialsFolder, "secret.json"))){
+            secret = JSON.parse(fs.readFileSync(path.resolve(dirname, credentialsFolder, "secret.json"), "utf8"));
+        } else {
+            const newSecretJson = {
+                masterCode: Math.random().toString(36).substr(2, 8),
+                cookieSecret: crypto.randomBytes(256).toString('hex'),
+                adminPassword: Math.random().toString(36).substr(2, 8)
+            };
+            fs.writeFileSync(path.resolve(dirname, credentialsFolder, "secret.json"), JSON.stringify(newSecretJson, null, "    "));
+            secret = JSON.parse(fs.readFileSync(path.resolve(dirname, credentialsFolder, "secret.json"), "utf8"));
+        }
+    } catch (e) {
+        console.log(e)
+    }
+
+    if (secret){
+        server.masterCode = secret.masterCode;
+        server.cookieSecret = secret.cookieSecret;
+        server.adminPassword = secret.adminPassword;
     }
 
     return {
@@ -61,44 +97,51 @@ export default async function createServer(p = {}) {
     wapplrReact({wapp});
 
     const titlePattern = /^.{1,250}$/;
-    const contentPattern = /^.{1,2500}$/;
-    const contentBriefPattern = /^.{1,500}$/;
+    const contentPattern = /^.{1,20000}$/m;
 
     await wapp.server.postTypes.getPostType({
         name: "post",
         addIfThereIsNot: true,
+        statusManager: getPostStatusManager(),
         config: {
+            masterCode: config.server.masterCode,
             schemaFields: {
                 title: {
                     type: String,
                     wapplr: {
                         pattern: titlePattern,
-                        required: true
+                        validationMessage: messages.validationPostTitle,
+                        formData: {
+                            label: labels.postTitleLabel
+                        }
                     }
                 },
                 subtitle: {
                     type: String,
                     wapplr: {
                         pattern: titlePattern,
+                        validationMessage: messages.validationPostSubtitle,
+                        formData: {
+                            label: labels.postSubtitleLabel
+                        }
+
                     }
                 },
                 content: {
                     type: String,
                     wapplr: {
                         pattern: contentPattern,
-                        required: true
+                        validationMessage: messages.validationPostContent,
+                        required: true,
+                        formData: {
+                            label: labels.postContentLabel,
+                            multiline: true,
+                            rows: 4,
+                            rowsMin: 4,
+                            rowsMax: 20,
+                        }
                     }
-                },
-                contentBrief: {
-                    type: String,
-                    wapplr: {
-                        pattern: contentBriefPattern,
-                    }
-                },
-            },
-            requiredDataForStatus: {
-                title: { type: String },
-                content: { type: String },
+                }
             },
         }
     })
@@ -111,9 +154,12 @@ export default async function createServer(p = {}) {
                 first: "Admin"
             },
             email: "admin@wapplr.com",
-            password: "123456Ab"
+            password: config.server.adminPassword
         },
+        statusManager: getDefaultStatusManager(),
         config: {
+            cookieSecret: config.server.cookieSecret,
+            masterCode: config.server.masterCode,
             disableUseSessionMiddleware: true,
             mailer: {
                 send: async function(type, data, input) {
@@ -141,12 +187,11 @@ export default async function createServer(p = {}) {
                         console.log(url);
                     }
                 }
-            }
+            },
         }
     }
 
     await wapp.server.authentications.getAuthentication(authSettings);
-    //await wapp.server.authentications.getAuthentication({...authSettings, name:"author"});
 
     wapplrGraphql({wapp}).init();
 

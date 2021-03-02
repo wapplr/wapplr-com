@@ -74,11 +74,12 @@ export default function materialStyle(theme) {
         },
         content: {
             flexGrow: 1,
+            maxWidth: "100%"
         },
-        page: {
-            paddingTop: theme.mixins.toolbar.minHeight,
+        pagePaddingTop: {
+            height: theme.mixins.toolbar.minHeight,
             "@media (min-width:600px)": {
-                paddingTop: theme.mixins.toolbar["@media (min-width:600px)"].minHeight,
+                height: theme.mixins.toolbar["@media (min-width:600px)"].minHeight,
             },
         }
     }

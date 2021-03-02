@@ -1,11 +1,14 @@
 import React, {useContext, useEffect, useState} from "react";
 
+import Button from "@material-ui/core/Button";
+import Typography from "@material-ui/core/Typography";
+
 import {WappContext, withWapp} from "wapplr-react/dist/common/Wapp";
-import {withMaterialStyles} from "../../Template/withMaterial";
 import getUtils from "wapplr-react/dist/common/Wapp/getUtils";
 
-import Button from "@material-ui/core/Button";
-
+import getUserName from "../../../utils/getUserName";
+import {withMaterialStyles} from "../../Template/withMaterial";
+import Avatar from "../../Avatar/me";
 import AppContext from "../../App/context";
 
 import materialStyle from "./materialStyle";
@@ -19,7 +22,7 @@ function Profile(props) {
     } = props;
 
     const accountContext = useContext(AccountContext);
-    const {user, name} = accountContext;
+    const {user, parentRoute, name} = accountContext;
 
     const appContext = useContext(AppContext);
     const context = useContext(WappContext);
@@ -29,13 +32,24 @@ function Profile(props) {
 
     async function onSubmit(e) {
         e.preventDefault();
-        await utils.logout({requestName: name+"Logout", redirect: null});
+        await utils.logout({requestName: name+"Logout", redirect: {pathname: parentRoute, search:"", hash:""}});
     }
 
     wapp.styles.use(style);
+    const userName = getUserName(user);
 
     return (
         <div className={style.profile}>
+            <div className={style.userBox}>
+                <div className={style.avatar}>
+                    <Avatar size={"big"}/>
+                </div>
+                <div className={style.userName}>
+                    <Typography variant="h5" >
+                        {userName}
+                    </Typography>
+                </div>
+            </div>
             <form className={style.form}
                   autoComplete={"off"}
                   noValidate

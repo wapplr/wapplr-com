@@ -32,21 +32,21 @@ function ChangeData(props) {
         formDataFromResolvers = utils.getGlobalState().res.graphql.mutation[name+"Save"].formData;
     } catch (e){}
 
+    const formData = {
+        ...formDataFromResolvers,
+    }
+
     if (user?._id){
-        formDataFromResolvers._id.value = user._id;
-        formDataFromResolvers._id.disabled = true;
+        formData._id.value = user._id;
+        formData._id.disabled = true;
     }
 
     if (user?.name?.first){
-        formDataFromResolvers["record.name.first"].value = user?.name?.first;
+        formData["record.name.first"].value = user?.name?.first;
     }
 
     if (user?.name?.last){
-        formDataFromResolvers["record.name.last"].value = user?.name?.last;
-    }
-
-    const formData = {
-        ...formDataFromResolvers,
+        formData["record.name.last"].value = user?.name?.last;
     }
 
     wapp.styles.use(style);

@@ -11,6 +11,6 @@ export default function makeMaterialStyle(theme) {
         },
         listItemIcon: {
             color: theme.palette.text.primary
-        },
+        }
     }
 }

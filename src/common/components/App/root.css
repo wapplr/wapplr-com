@@ -1,0 +1,13 @@
+:root {
+    --bg-color: #ffffff;
+    --font-color: rgba(0, 0, 0, 0.87);
+}
+
+@media (prefers-color-scheme: dark) {
+
+    :root {
+        --bg-color: #303338;
+        --font-color: #ffffff;
+    }
+
+}

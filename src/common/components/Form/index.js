@@ -28,7 +28,10 @@ const components = {
             helperText: "",
             variant: "outlined",
             autoComplete: "on",
-            disabled: false
+            disabled: false,
+            multiline: false,
+            rows: null,
+            rowsMax: null
         },
         Component: TextField
     }
@@ -59,7 +62,7 @@ function getComponentName({data, key}) {
 
 function generatePropsAndSelectComponent({formData, key, onSubmit, onChange}) {
 
-    const data = {...formData[key]}
+    const data = {...formData[key]};
 
     const componentName = getComponentName({data, key});
 
@@ -72,7 +75,7 @@ function generatePropsAndSelectComponent({formData, key, onSubmit, onChange}) {
     }
 
     const props = Object.keys(defaultProps).reduce(function (a, key, i) {
-        a[key] = data[key] || defaultProps[key];
+        a[key] = (typeof data[key] !== "undefined") ? data[key] : defaultProps[key];
         return a;
     }, {})
 
@@ -109,7 +112,7 @@ class Form extends React.Component {
 
         this.state = {
             snackMessage: "",
-            formData: {...props.formData || {}}
+            formData: {...JSON.parse(JSON.stringify(props.formData)) || {}}
         };
 
         this.onChange = this.onChange.bind(this);
@@ -124,6 +127,13 @@ class Form extends React.Component {
             this.addStyle();
         }
 
+    }
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (this.props.formData !== prevProps.formData) {
+            this.setState({
+                formData: {...JSON.parse(JSON.stringify(this.props.formData)) || {}}
+            })
+        }
     }
     componentDidMount() {
         this.addStyle()
@@ -146,7 +156,7 @@ class Form extends React.Component {
         if (e.target.value !== data.value) {
             data.value = e.target.value;
             data.helperText = "";
-            data.error = "";
+            data.error = false;
             this.setState({
                 formData: {
                     ...formData,
@@ -255,6 +265,8 @@ class Form extends React.Component {
             }
         }
 
+        return response;
+
     }
     render() {
 
@@ -268,7 +280,7 @@ class Form extends React.Component {
         } = this.state;
 
         const {
-            materialStyle
+            materialStyle,
         } = this.props;
 
         return (

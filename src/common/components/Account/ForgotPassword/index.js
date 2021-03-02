@@ -33,16 +33,16 @@ function ForgotPassword(props) {
         formDataFromResolvers = utils.getGlobalState().res.graphql.mutation[name+"ForgotPassword"].formData;
     } catch (e){}
 
-    if (user?._id){
-        formDataFromResolvers.email.value = user.email;
-        formDataFromResolvers.email.disabled = true;
-    }
-
     const formData = {
         ...formDataFromResolvers,
         submit: {
             label: appContext.labels.forgotPasswordSubmitLabel
         }
+    }
+
+    if (user?._id){
+        formData.email.value = user.email;
+        formData.email.disabled = true;
     }
 
     wapp.styles.use(style);

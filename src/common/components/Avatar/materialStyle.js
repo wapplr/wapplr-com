@@ -14,5 +14,10 @@ export default function makeMaterialStyle(theme) {
             height: theme.spacing(4),
             fontSize: "1.1rem"
         },
+        big: {
+            width: theme.spacing(7),
+            height: theme.spacing(7),
+            fontSize: "1.75rem"
+        },
     }
 }

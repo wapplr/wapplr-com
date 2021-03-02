@@ -1,0 +1,13 @@
+.post{}
+
+.content{}
+
+.content pre {
+    background-color: #303338!important;
+}
+
+@media (prefers-color-scheme: dark) {
+    .content pre {
+        background: rgba(0, 0, 0, 0.14) !important;
+    }
+}

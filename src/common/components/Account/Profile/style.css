@@ -7,3 +7,26 @@
     margin-bottom: 24px;
 }
 
+.userBox{
+    padding: 8px;
+    margin-bottom: 32px;
+    display: table;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.avatar{
+    margin-left: auto;
+    margin-right: auto;
+    width: auto;
+    display: table;
+    padding: 8px;
+}
+
+.userName{
+    margin-left: auto;
+    margin-right: auto;
+    width: auto;
+    display: table;
+    padding: 8px;
+}

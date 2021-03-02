@@ -5,6 +5,7 @@ import AppContext from "./context";
 
 import Template from "../Template";
 import Account from "../Account";
+import Post from "../Post";
 
 import style from "./style.css";
 
@@ -42,6 +43,7 @@ export default function App(props) {
             <div className={style.app}>
                 <Template url={url}>
                     {(url.startsWith(routes.accountRoute)) ? <Account url={url}/> : null}
+                    {(url.startsWith(routes.postRoute)) ? <Post url={url}/> : null}
                 </Template>
             </div>
         </AppContext.Provider>

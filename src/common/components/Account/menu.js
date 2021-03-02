@@ -1,12 +1,13 @@
 import AccountCircleIcon from "@material-ui/icons/AccountCircle";
 import PersonAddIcon from "@material-ui/icons/PersonAdd";
 import ExitToAppIcon from "@material-ui/icons/ExitToApp";
-import HelpIcon from '@material-ui/icons/Help';
-import LockIcon from '@material-ui/icons/Lock';
-import PersonIcon from '@material-ui/icons/Person';
+import HelpIcon from "@material-ui/icons/Help";
+import LockIcon from "@material-ui/icons/Lock";
+import PersonIcon from "@material-ui/icons/Person";
 import EmailIcon from "@material-ui/icons/Email";
+import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 
-import menus from "./constants/menus";
+import menus from "../../config/constants/menus";
 
 const accountMenu = [
     {
@@ -49,7 +50,7 @@ const accountMenu = [
         role: function (p) {
             return p?.user?._id && !p?.user?.emailConfirmed;
         },
-        Icon: EmailIcon
+        Icon: CheckCircleIcon
     },
     {
         name: menus.changePassword, href:"/changepassword",

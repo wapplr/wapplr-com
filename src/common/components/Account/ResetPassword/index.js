@@ -25,7 +25,7 @@ function ResetPassword(props) {
     const {wapp, req, res} = context;
 
     async function onSubmit(e, formData) {
-        return await utils.sendRequest({requestName: name+"ResetPassword", args: formData, redirect: {pathname: parentRoute, search:"", hash:""}, timeOut:2000 });
+        return await utils.sendRequest({requestName: name+"ResetPassword", args: formData, redirect: {pathname: parentRoute, search:"", hash:""}, timeOut:1000 });
     }
 
     let formDataFromResolvers = {};
@@ -43,18 +43,18 @@ function ResetPassword(props) {
     const query = req.wappRequest.query;
 
     if (query.hash){
-        formDataFromResolvers.passwordRecoveryKey.value = query.hash;
-        formDataFromResolvers.passwordRecoveryKey.disabled = true;
+        formData.passwordRecoveryKey.value = query.hash;
+        formData.passwordRecoveryKey.disabled = true;
     }
 
     if (query.email){
-        formDataFromResolvers.email.value = query.email;
-        formDataFromResolvers.email.disabled = true;
+        formData.email.value = query.email;
+        formData.email.disabled = true;
     }
 
     if (user?._id && user?.email){
-        formDataFromResolvers.email.value = user.email;
-        formDataFromResolvers.email.disabled = true;
+        formData.email.value = user.email;
+        formData.email.disabled = true;
     }
 
     wapp.styles.use(style);
