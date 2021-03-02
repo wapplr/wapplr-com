@@ -47,7 +47,7 @@ function router({user, post, page}) {
         return null;
     }
 
-    const show = !!((isNotDeleted && postId) || (!isNotDeleted && isAdminOrAuthor && postId));
+    const show = !!((isNotDeleted && postId) || (!isNotDeleted && isAdminOrAuthor && postId) || (user?._id && page === "new"));
 
     if (!show) {
         return null
@@ -244,7 +244,7 @@ function Post(props) {
         const isAdmin = user?._status_isFeatured;
         const isAuthorOrAdmin = !!(isAuthor || isAdmin)
 
-        if (isAuthorOrAdmin){
+        if (isAuthorOrAdmin && page !== "new"){
 
             return (
                 <>
@@ -268,7 +268,7 @@ function Post(props) {
             )
         }
 
-        return (isBanned) ? appContext.titles.statusBannedTitle : (!isNotDeleted) ? appContext.titles.statusDeletedTitle : (!isValidated) ? appContext.titles.statusMissingDataTitle : (page === "edit") ? null : post?.subtitle;
+        return (page === "edit") ? null : post?.subtitle;
     }
 
     const subtitle = getSubtitle();

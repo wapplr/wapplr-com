@@ -34,7 +34,7 @@
         "wapplr-com build": "wapplr-cli build --production",
         "wapplr-com clean": "wapplr-cli clean"
     },
-    "version": "1.0.15",
+    "version": "1.0.16",
     "files": [
         "dist/*"
     ],
