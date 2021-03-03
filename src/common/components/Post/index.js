@@ -109,7 +109,8 @@ function Post(props) {
         getSubtitle = function (post) {return post?.subtitle},
         getMenu,
         pages = defaultPages,
-        layoutType
+        layoutType,
+        maxWidth = "lg"
     } = props;
 
     const utils = getUtils(context);
@@ -332,7 +333,7 @@ function Post(props) {
             {
                 (pageName) ?
                     <div className={style.post}>
-                        <Container fixed className={materialStyle.container} maxWidth={"sm"}>
+                        <Container fixed className={materialStyle.container} maxWidth={maxWidth}>
                             <Paper elevation={3}>
                                 {(layoutType === "user") ?
                                     <div className={style.userLayout}>

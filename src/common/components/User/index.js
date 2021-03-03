@@ -47,6 +47,7 @@ function User(props) {
             getMenu={getMenu}
             pages={pages}
             layoutType={"user"}
+            maxWidth={"sm"}
         />
     )
 
