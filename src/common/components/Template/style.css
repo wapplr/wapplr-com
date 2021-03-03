@@ -25,6 +25,14 @@
     margin-right: 12px;
 }
 
+.title{
+    width: 100%;
+}
+
+.avatar{
+    cursor: pointer;
+}
+
 .footer {
     display: flex;
     align-items: center;

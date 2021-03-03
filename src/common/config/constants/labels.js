@@ -5,6 +5,7 @@ const labels = {
     changeEmailSubmitLabel: "Change email",
     changePasswordSubmitLabel: "Change password",
     emailConfirmationSubmitLabel: "Confirm email",
+    deleteAccountLabel: "Delete account",
     emailConfirmationSendAgainSubmitLabel: "Send confirmation key to new email address again",
     postTitleLabel: "Title",
     postSubtitleLabel: "Subtitle",

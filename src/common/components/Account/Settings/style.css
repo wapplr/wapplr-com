@@ -1,0 +1,16 @@
+.settings{}
+
+.form{}
+
+.form > div{
+    width: 100%;
+    margin-bottom: 24px;
+}
+
+.menu{
+    border-style: solid;
+    border-color: #000000;
+    border-width: 1px;
+    border-radius: 5px;
+    margin-bottom: 32px;
+}

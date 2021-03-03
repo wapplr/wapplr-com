@@ -1,4 +1,3 @@
-import menus from "../../config/constants/menus";
 import EditIcon from "@material-ui/icons/Edit";
 import DeleteIcon from "@material-ui/icons/Delete";
 import BlockIcon from "@material-ui/icons/Block";
@@ -6,7 +5,11 @@ import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import StarIcon from "@material-ui/icons/Star";
 import StarBorderIcon from "@material-ui/icons/StarBorder";
 
-function getMenu(props) {
+function getMenu(props = {}) {
+
+    const {appContext} = props;
+    const {menus} = appContext;
+
     return [
         {
             name: menus.editMenu,
@@ -15,7 +18,7 @@ function getMenu(props) {
             },
             role: function (p) {
                 const isAdmin = p?.user?._status_isFeatured;
-                const isAuthor = p?.user?._id === p?.post?._author;
+                const isAuthor = ((p?.user?._id && p?.user?._id === p?.post?._author) || (p?.user?._id && p?.user?._id === p?.post?._author?._id));
                 const isBanned = p?.post?._status_isBanned;
                 const isFeatured = p?.post?._status_isFeatured;
 
@@ -44,7 +47,7 @@ function getMenu(props) {
             },
             role: function (p) {
                 const isAdmin = p?.user?._status_isFeatured;
-                const isAuthor = p?.user?._id === p?.post?._author;
+                const isAuthor = ((p?.user?._id && p?.user?._id === p?.post?._author) || (p?.user?._id && p?.user?._id === p?.post?._author?._id));
                 const isBanned = p?.post?._status_isBanned;
                 const isFeatured = p?.post?._status_isFeatured;
 

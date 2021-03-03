@@ -16,18 +16,23 @@ import IconButton from "@material-ui/core/IconButton";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
+import AccountCircleIcon from "@material-ui/icons/AccountCircle";
 
 import MenuIcon from "@material-ui/icons/Menu";
 import CloseIcon from '@material-ui/icons/Close';
 
 import {storage} from "../../utils/localStorage";
 
+
+import AppContext from "../App/context";
+import Avatar from "../Avatar/me";
+
 import {withMaterialTheme, withMaterialStyles} from "./withMaterial";
 import {materialTheme, materialMediaQuery} from "./materialTheme";
 import style from "./style.css";
 import materialStyle from "./materialStyle";
 
-import menu from "./menu";
+import getMenu from "./menu";
 
 function Template(props) {
 
@@ -42,6 +47,7 @@ function Template(props) {
     //const materialTheme = useTheme();
 
     const context = useContext(WappContext);
+    const appContext = useContext(AppContext);
     const utils = getUtils(context);
 
     const {wapp} = context;
@@ -88,11 +94,11 @@ function Template(props) {
         }
 
         const target = menu.target || "self";
-        const href = menu.href;
+        const href = (typeof menu.href == "function") ? menu.href({user}) : menu.href;
 
         const inner = !(target === "_blank" || (href && href.slice(0,7) === "http://") || (href && href.slice(0,8) === "https://"));
 
-        if (inner){
+        if (inner) {
 
             if (narrow) {
                 handleDrawerClose();
@@ -128,6 +134,16 @@ function Template(props) {
         }
     }, [open, subscribe, user]);
 
+    const menu = getMenu({appContext});
+
+    const avatarClick = (e) => {
+        wapp.client.history.push({pathname: appContext.routes.userRoute + "/" + user._id, search:"", hash:""})
+    }
+
+    const loginClick = (e) => {
+        wapp.client.history.push({pathname: appContext.routes.accountRoute+"/login", search:"", hash:""})
+    }
+
     return (
 
         <div className={materialStyle.root}>
@@ -153,9 +169,27 @@ function Template(props) {
                     <div className={style.logo}>
                         <Logo />
                     </div>
-                    <Typography variant={"h6"} noWrap>
-                        {title}
-                    </Typography>
+                    <div className={style.title}>
+                        <Typography variant={"h6"} noWrap>
+                            {title}
+                        </Typography>
+                    </div>
+                    {(user?._id) ?
+                        <>
+                            <div className={style.avatar} onClick={avatarClick}>
+                                <Avatar/>
+                            </div>
+                        </>
+                        :
+                        <div>
+                            <IconButton
+                                color={"inherit"}
+                                onClick={loginClick}
+                            >
+                                <AccountCircleIcon />
+                            </IconButton>
+                        </div>
+                    }
                 </Toolbar>
             </AppBar>
             <Drawer
@@ -184,7 +218,7 @@ function Template(props) {
                         {[...menu.map(function (menu, key) {
 
                             const target = menu.target || "self";
-                            const href = menu.href;
+                            const href = (typeof menu.href == "function") ? menu.href({user}) : menu.href;
                             const Icon = menu.Icon;
                             const show = (menu.role) ? menu.role({user}) : true;
                             const name = (typeof menu.name == "function") ? menu.name({user}) : menu.name;

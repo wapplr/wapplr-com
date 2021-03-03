@@ -50,16 +50,25 @@ function Edit(props) {
         formData._id.disabled = true;
     }
 
-    if (post?.title){
-        formData["record.title"].value = post.title;
-    }
-
-    if (post?.subtitle){
-        formData["record.subtitle"].value = post.subtitle;
-    }
-
-    if (post?.content){
-        formData["record.content"].value = post.content;
+    if (post?._id) {
+        Object.keys(formData).forEach(function (key) {
+            if (key.startsWith("record.")) {
+                const ka = key.split(".");
+                let value = post;
+                ka.forEach(function (nk) {
+                    if (nk !== "record"){
+                        if (value && value[nk]){
+                            value = value[nk];
+                        } else {
+                            value = null;
+                        }
+                    }
+                })
+                if (value){
+                    formData[key].value = value;
+                }
+            }
+        })
     }
 
     wapp.styles.use(style);

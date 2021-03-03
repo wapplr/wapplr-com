@@ -1,6 +1,6 @@
 const titles = {
     loginTitle: "Login",
-    accountTitle: "Account",
+    accountTitle: "Account settings",
     changeDataTitle: "Change data",
     changeEmailTitle: "Change email",
     emailConfirmationTitle: "Email confirmation",
@@ -8,6 +8,8 @@ const titles = {
     logoutTitle: "Logout",
     forgotPasswordTitle: "Forgot password",
     resetPasswordTitle: "Reset password",
+    changePasswordTitle: "Change password",
+    deleteAccountTitle: "Delete account",
     homeTitle: "Home",
     postTitle: "Post",
     newPostTitle: "New post",
@@ -22,7 +24,12 @@ const titles = {
     dialogBanPostTitle: "Ban post",
     dialogApprovePostTitle: "Approve post",
     dialogMarkFeaturedPostTitle: "Mark post to featured",
-    dialogRemoveMarkFeaturedPostTitle: "Remove featured mark of post"
+    dialogRemoveMarkFeaturedPostTitle: "Remove featured mark of post",
+    dialogDeleteAccountTitle: "Delete account",
+
+    userTitle: "User",
+    editUserTitle: "Edit user",
+    dashboardTitle: "Dashboard",
 };
 
 export default titles;

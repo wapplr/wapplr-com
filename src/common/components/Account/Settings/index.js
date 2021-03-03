@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from "react";
+import React, {useContext} from "react";
 
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
@@ -14,15 +14,18 @@ import AppContext from "../../App/context";
 import materialStyle from "./materialStyle";
 import style from "./style.css";
 import AccountContext from "../context";
+import Menu from "../../Menu";
+import getMenu from "../menu";
 
 function Profile(props) {
 
     const {
-        materialStyle
+        materialStyle,
+        logout
     } = props;
 
     const accountContext = useContext(AccountContext);
-    const {user, parentRoute, name} = accountContext;
+    const {user, parentRoute, name, page} = accountContext;
 
     const appContext = useContext(AppContext);
     const context = useContext(WappContext);
@@ -36,35 +39,36 @@ function Profile(props) {
     }
 
     wapp.styles.use(style);
-    const userName = getUserName(user);
 
     return (
-        <div className={style.profile}>
-            <div className={style.userBox}>
-                <div className={style.avatar}>
-                    <Avatar size={"big"}/>
+        <div className={style.settings}>
+            {(!logout) ?
+                <div className={style.menu}>
+                    <Menu
+                        parentRoute={parentRoute}
+                        menu={getMenu({appContext})}
+                        materialStyle={materialStyle}
+                        menuProperties={{user, page}}
+                        list={true}
+                    />
                 </div>
-                <div className={style.userName}>
-                    <Typography variant="h5" >
-                        {userName}
-                    </Typography>
-                </div>
-            </div>
-            <form className={style.form}
-                  autoComplete={"off"}
-                  noValidate
-                  onSubmit={onSubmit}
-            >
-                <Button
-                    className={materialStyle.logoutSubmit}
-                    variant={"contained"}
-                    color={"secondary"}
-                    onClick={onSubmit}
-                    type={"submit"}
+                :
+                <form className={style.form}
+                      autoComplete={"off"}
+                      noValidate
+                      onSubmit={onSubmit}
                 >
-                    {appContext.labels.logoutSubmitLabel}
-                </Button>
-            </form>
+                    <Button
+                        className={materialStyle.logoutSubmit}
+                        variant={"contained"}
+                        color={"secondary"}
+                        onClick={onSubmit}
+                        type={"submit"}
+                    >
+                        {appContext.labels.logoutSubmitLabel}
+                    </Button>
+                </form>
+            }
         </div>
     )
 }

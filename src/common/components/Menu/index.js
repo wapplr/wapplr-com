@@ -6,7 +6,9 @@ import getUtils from "wapplr-react/dist/common/Wapp/getUtils";
 import IconButton from "@material-ui/core/IconButton";
 import MoreIcon from "@material-ui/icons/MoreVert";
 import MaterialMenu from "@material-ui/core/Menu";
+import List from "@material-ui/core/List";
 import MenuItem from "@material-ui/core/MenuItem";
+import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 
@@ -27,6 +29,7 @@ function Menu(props) {
         menu = [],
         materialStyle = {},
         menuProperties = {},
+        list,
         effect
     } = props;
 
@@ -48,7 +51,7 @@ function Menu(props) {
 
         const target = menu.target || "self";
         const href = (typeof menu.href == "function") ? menu.href(menuProperties) : menu.href;
-
+        const disableParentRoute = menu.disableParentRoute;
         const inner = !(target === "_blank" || (href && href.slice(0,7) === "http://") || (href && href.slice(0,8) === "https://"));
 
         if (inner){
@@ -56,7 +59,7 @@ function Menu(props) {
             wapp.client.history.push({
                 search:"",
                 hash:"",
-                ...wapp.client.history.parsePath(parentRoute + href)
+                ...wapp.client.history.parsePath((disableParentRoute) ? href : parentRoute + href)
             });
 
             setAnchorEl(null);
@@ -70,18 +73,27 @@ function Menu(props) {
     }
 
     useEffect(function () {
-        if (props.effect){
-            props.effect({
+        if (effect){
+            effect({
                 actions
             })
         }
     })
 
-    const featuredMenus = [...menu.filter(function (menu, key) {return !!(menu.featured)})];
+    const featuredMenus = [...menu.filter(function (menu, key) {return !!(menu.featured && !list)})];
     const showFeaturedMenu = [...featuredMenus.filter(function (menu, key) {return (menu.role) ? menu.role(menuProperties) : true})];
 
-    const moreMenus = [...menu.filter(function (menu, key) {return !(menu.featured)})];
+    const moreMenus = [...menu.filter(function (menu, key) {return !(menu.featured && !list)})];
     const showMoreMenu = [...moreMenus.filter(function (menu, key) {return (menu.role) ? menu.role(menuProperties) : true})];
+
+    const MenuComponent = (list) ? List : MaterialMenu;
+    const ItemComponent = (list) ? ListItem : MenuItem;
+    const menuComponentProps = (list) ? {} : {
+        anchorEl,
+        keepMounted: true,
+        open:Boolean(anchorEl),
+        onClose:handleMenuClose
+    }
 
     return (
         <>  {
@@ -92,29 +104,23 @@ function Menu(props) {
                     const href = (typeof menu.href == "function") ? menu.href(menuProperties) : menu.href;
                     const Icon = menu.Icon;
                     const show = (menu.role) ? menu.role(menuProperties) : true;
-
                     const inner = !(target === "_blank" || (href && href.slice(0,7) === "http://") || (href && href.slice(0,8) === "https://"));
 
                     if (show) {
-
                         return (
                             <IconButton
                                 key={"featured"+key}
                                 component={"a"}
                                 color={"inherit"}
-                                onClick={function (e) {
-                                    onClick(e, menu)
-                                }}
+                                onClick={function (e) {onClick(e, menu);}}
                                 href={(inner) ? parentRoute + href : href}
                             >
                                 {(Icon) ? <Icon/> : null}
                             </IconButton>
                         )
-
                     }
 
                     return null;
-
                 })]
                 :
                 null
@@ -122,21 +128,21 @@ function Menu(props) {
             {
                 (showMoreMenu.length > 0) ?
                     <>
-                        <IconButton
-                            color={"inherit"}
-                            onClick={handleMenuOpen}
-                            aria-controls={"post-menu"}
-                            aria-haspopup={"true"}
-                            aria-label={"post-menu"}
-                        >
-                            <MoreIcon />
-                        </IconButton>
-                        <MaterialMenu
+                        {(!list) ?
+                            <IconButton
+                                color={"inherit"}
+                                onClick={handleMenuOpen}
+                                aria-controls={"post-menu"}
+                                aria-haspopup={"true"}
+                                aria-label={"post-menu"}
+                            >
+                                <MoreIcon />
+                            </IconButton>
+                            : null
+                        }
+                        <MenuComponent
                             id={"post-menu"}
-                            anchorEl={anchorEl}
-                            keepMounted
-                            open={Boolean(anchorEl)}
-                            onClose={handleMenuClose}
+                            {...menuComponentProps}
                         >
                             {[...moreMenus.map(function (menu, key) {
 
@@ -144,13 +150,12 @@ function Menu(props) {
                                 const href = (typeof menu.href == "function") ? menu.href(menuProperties) : menu.href;
                                 const Icon = menu.Icon;
                                 const show = (menu.role) ? menu.role(menuProperties) : true;
-
                                 const inner = !(target === "_blank" || (href && href.slice(0,7) === "http://") || (href && href.slice(0,8) === "https://"));
 
                                 if (show) {
 
                                     return (
-                                        <MenuItem
+                                        <ItemComponent
                                             button
                                             component={"a"}
                                             key={"menu"+key}
@@ -167,7 +172,7 @@ function Menu(props) {
                                                 </ListItemIcon> : null
                                             }
                                             <ListItemText primary={menu.name}/>
-                                        </MenuItem>
+                                        </ItemComponent>
                                     )
 
                                 }
@@ -175,7 +180,7 @@ function Menu(props) {
                                 return null;
 
                             })]}
-                        </MaterialMenu>
+                        </MenuComponent>
                     </>
                     :
                     null

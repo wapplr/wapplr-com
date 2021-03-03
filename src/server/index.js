@@ -96,6 +96,53 @@ export default async function createServer(p = {}) {
     wapplrAuthentication({wapp});
     wapplrReact({wapp});
 
+    const authSettings = {
+        name: "user",
+        addIfThereIsNot: true,
+        admin: {
+            name: {
+                first: "Admin"
+            },
+            email: "admin@wapplr.com",
+            password: config.server.adminPassword
+        },
+        statusManager: getDefaultStatusManager(),
+        config: {
+            cookieSecret: config.server.cookieSecret,
+            masterCode: config.server.masterCode,
+            disableUseSessionMiddleware: true,
+            mailer: {
+                send: async function(type, data, input) {
+                    const {req} = input;
+
+                    const hostname = req.wappRequest.hostname;
+                    const protocol = req.wappRequest.protocol;
+
+                    if (type === "signup"){
+                        const emailConfirmationRoute = routes.accountRoute + "/emailconfirmation";
+                        const user = data;
+                        const url = protocol + "://" + hostname + emailConfirmationRoute + "/?hash=" + encodeURIComponent(user.emailConfirmationKey) + "&email=" + encodeURIComponent(user.email) + ""
+                        console.log(url);
+                    }
+                    if (type === "forgotPassword") {
+                        const resetPasswordRoute = routes.accountRoute + "/resetpassword";
+                        const user = data;
+                        const url = protocol + "://" + hostname + resetPasswordRoute + "/?hash=" + encodeURIComponent(user.passwordRecoveryKey) + "&email=" + encodeURIComponent(user.email) + ""
+                        console.log(url);
+                    }
+                    if (type === "emailConfirmation"){
+                        const emailConfirmationRoute = routes.accountRoute + "/emailconfirmation";
+                        const user = data;
+                        const url = protocol + "://" + hostname + emailConfirmationRoute + "/?hash=" + encodeURIComponent(user.emailConfirmationKey) + "&email=" + encodeURIComponent(user.email) + ""
+                        console.log(url);
+                    }
+                }
+            },
+        }
+    }
+
+    await wapp.server.authentications.getAuthentication(authSettings);
+
     const titlePattern = /^.{1,250}$/;
     const contentPattern = /^.{1,20000}$/m;
 
@@ -143,55 +190,21 @@ export default async function createServer(p = {}) {
                     }
                 }
             },
+            setSchemaMiddleware: function ({schema}) {
+
+                schema.virtualToGraphQl({
+                    name: "content_extract",
+                    get: function () {
+                        return this.content.replace(/\r?\n|\r/g, " ").replace(/#/g, " ").trim().replace(/ +(?= )/g," - ").replace(/ +(?= )/g,"").slice(0,250)+"..."
+                    },
+                    options: {
+                        instance: "String"
+                    }
+                })
+
+            }
         }
     })
-
-    const authSettings = {
-        name: "user",
-        addIfThereIsNot: true,
-        admin: {
-            name: {
-                first: "Admin"
-            },
-            email: "admin@wapplr.com",
-            password: config.server.adminPassword
-        },
-        statusManager: getDefaultStatusManager(),
-        config: {
-            cookieSecret: config.server.cookieSecret,
-            masterCode: config.server.masterCode,
-            disableUseSessionMiddleware: true,
-            mailer: {
-                send: async function(type, data, input) {
-                    const {req} = input;
-
-                    const hostname = req.wappRequest.hostname;
-                    const protocol = req.wappRequest.protocol;
-
-                    if (type === "signup"){
-                        const emailConfirmationRoute = routes.accountRoute + "/emailconfirmation";
-                        const user = data;
-                        const url = protocol + "://" + hostname + emailConfirmationRoute + "/?hash=" + encodeURIComponent(user.emailConfirmationKey) + "&email=" + encodeURIComponent(user.email) + ""
-                        console.log(url);
-                    }
-                    if (type === "forgotPassword") {
-                        const resetPasswordRoute = routes.accountRoute + "/resetpassword";
-                        const user = data;
-                        const url = protocol + "://" + hostname + resetPasswordRoute + "/?hash=" + encodeURIComponent(user.passwordRecoveryKey) + "&email=" + encodeURIComponent(user.email) + ""
-                        console.log(url);
-                    }
-                    if (type === "emailConfirmation"){
-                        const emailConfirmationRoute = routes.accountRoute + "/emailconfirmation";
-                        const user = data;
-                        const url = protocol + "://" + hostname + emailConfirmationRoute + "/?hash=" + encodeURIComponent(user.emailConfirmationKey) + "&email=" + encodeURIComponent(user.email) + ""
-                        console.log(url);
-                    }
-                }
-            },
-        }
-    }
-
-    await wapp.server.authentications.getAuthentication(authSettings);
 
     wapplrGraphql({wapp}).init();
 

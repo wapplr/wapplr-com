@@ -7,16 +7,57 @@
     min-height: inherit;
 }
 
+.avatarContainer{
+    margin-right: 24px;
+    height: 100%;
+    cursor: pointer;
+}
+
 .titleContainer {
     width: 100%;
     overflow: hidden
 }
 .title {}
-.subtitle {
-    margin-bottom: 12px;
+.subtitle {}
+.status {
+    display: flex;
 }
 
 .content {
     min-height: 128px;
     padding: 32px;
+}
+
+.userLayout {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+}
+
+.userBox {
+    padding: 8px;
+    margin-bottom: 32px;
+    display: table;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.userLayout .avatarContainer{
+    margin-left: auto;
+    margin-right: auto;
+    width: auto;
+    display: table;
+    padding: 8px;
+    cursor: pointer;
+}
+
+.userLayout .titleContainer{
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    width: auto;
+    display: table;
+    padding: 8px;
+    cursor: pointer;
 }

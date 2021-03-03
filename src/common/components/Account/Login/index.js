@@ -9,6 +9,7 @@ import Form from "../../Form";
 import materialStyle from "./materialStyle";
 import style from "./style.css";
 import AccountContext from "../context";
+import AppContext from "../../App/context";
 
 function Login(props) {
 
@@ -16,6 +17,7 @@ function Login(props) {
     const {user, parentRoute, name} = accountContext;
 
     const context = useContext(WappContext);
+    const appContext = useContext(AppContext);
     const utils = getUtils(context);
     const {materialStyle} = props;
 
@@ -24,7 +26,7 @@ function Login(props) {
     const query = req.wappRequest.query;
 
     async function onSubmit(e, formData) {
-        return await utils.login({requestName: name+"Login", args: formData, redirect: {pathname: query.redirect || parentRoute, search:"", hash:""}});
+        return await utils.login({requestName: name+"Login", args: formData, redirect: {pathname: query.redirect || appContext.routes.userRoute+"/:_id", search:"", hash:""}});
     }
 
     let formDataFromResolvers = {};

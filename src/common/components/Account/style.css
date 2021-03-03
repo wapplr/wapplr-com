@@ -7,6 +7,37 @@
     min-height: inherit;
 }
 
+.userBox{
+    padding: 8px;
+    margin-bottom: 32px;
+    display: table;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.avatar{
+    margin-left: auto;
+    margin-right: auto;
+    width: auto;
+    display: table;
+    padding: 8px;
+    cursor: pointer;
+}
+
+.userName{
+    margin-left: auto;
+    margin-right: auto;
+    width: auto;
+    display: table;
+    padding: 8px;
+    cursor: pointer;
+}
+
+.status {
+    display: flex;
+    justify-content: center;
+}
+
 .content{
     min-height: 128px;
     padding: 32px;

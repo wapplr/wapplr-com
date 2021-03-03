@@ -9,25 +9,27 @@ import Typography from "@material-ui/core/Typography";
 import AppBar from "@material-ui/core/AppBar";
 import Paper from "@material-ui/core/Paper";
 
+import AppContext from "../App/context";
+
 import {withMaterialStyles} from "../Template/withMaterial";
 import Dialog from "../Dialog";
 import Menu from "../Menu";
 import NotFound from "../NotFound";
-
-import AppContext from "../App/context";
+import Avatar from "../Avatar";
 
 import style from "./style.css";
 import materialStyle from "./materialStyle";
 
 import PostContext from "./context";
+import getDefaultMenu from "./menu";
 
 import New from "./New";
 import Edit from "./Edit";
 import Content from "./Content";
-import getMenu from "./menu";
-import Form from "../Form";
+import RemoveFeaturedForm from "./RemoveFeaturedForm";
+import FeaturedForm from "./FeaturedForm";
 
-const pages = {
+const defaultPages = {
     content: Content,
     new: New,
     edit: Edit,
@@ -36,7 +38,7 @@ const pages = {
 function router({user, post, page}) {
 
     const isAdmin = user?._status_isFeatured;
-    const isAuthor = user?._id === post?._author;
+    const isAuthor = ((user?._id && user?._id === post?._author) || (user?._id && user?._id === post?._author?._id));
     const isAdminOrAuthor = (isAdmin || isAuthor);
     const isNotDeleted = post?._status_isNotDeleted;
     const isBanned = post?._status_isBanned;
@@ -47,7 +49,7 @@ function router({user, post, page}) {
         return null;
     }
 
-    const show = !!((isNotDeleted && postId) || (!isNotDeleted && isAdminOrAuthor && postId) || (user?._id && page === "new"));
+    const show = !!((isNotDeleted && postId) || (!isNotDeleted && isAdminOrAuthor && postId) || (user?._id && user?._status_isNotDeleted && page === "new"));
 
     if (!show) {
         return null
@@ -83,7 +85,7 @@ function Router(props) {
 
     const postContext = useContext(PostContext);
     const {user, post} = postContext;
-    const {page} = props;
+    const {page, pages} = props;
 
     const pageName = router({user, post, page})
     const Page = (pageName) ? pages[pageName] : null;
@@ -91,50 +93,8 @@ function Router(props) {
     return (Page) ? <Page /> : null;
 }
 
-function RemoveFeaturedForm(props) {
-
-    const {
-        onSubmit,
-        setFormRef
-    } = props;
-
-    const postContext = useContext(PostContext);
-    // eslint-disable-next-line no-unused-vars
-    const {name, user, post, parentRoute} = postContext;
-
-    const context = useContext(WappContext);
-    const {wapp} = context;
-    const utils = getUtils(context);
-
-    let formDataFromResolvers = {};
-    try {
-        formDataFromResolvers = utils.getGlobalState().res.graphql.mutation[name+"RemoveFeatured"].formData;
-    } catch (e){
-        console.log(e)
-    }
-
-    const formData = {
-        ...formDataFromResolvers,
-    }
-
-    delete formData.submit;
-
-    if (post?._id){
-        formData._id.value = post._id;
-        formData._id.disabled = true;
-    }
-
-    return (
-        <div className={style.edit}>
-            <Form
-                ref={function (e) {
-                    setFormRef.current = e;
-                }}
-                formData={formData}
-                onSubmit={onSubmit}
-            />
-        </div>
-    )
+const capitalize = (s) => {
+    return s.charAt(0).toUpperCase() + s.slice(1)
 }
 
 function Post(props) {
@@ -144,9 +104,12 @@ function Post(props) {
 
     const {
         parentRoute = appContext.routes.postRoute,
-        // eslint-disable-next-line no-unused-vars
-        url,
-        name = "post"
+        name = "post",
+        getTitle = function (post) {return post?.title},
+        getSubtitle = function (post) {return post?.subtitle},
+        getMenu,
+        pages = defaultPages,
+        layoutType
     } = props;
 
     const utils = getUtils(context);
@@ -157,10 +120,10 @@ function Post(props) {
 
     wapp.styles.use(style);
 
-    const page = (res.wappResponse.route.path === appContext.routes.postRoute+"/new") ? "new" : res.wappResponse.route.params.page;
+    const page = (res.wappResponse.route.path === appContext.routes[name+"Route"]+"/new") ? "new" : res.wappResponse.route.params.page;
 
     const [user, setUser] = useState(utils.getRequestUser());
-    const [post, setPost] = useState((page === "new") ? null : utils.getGlobalState().res.responses?.postFindById);
+    const [post, setPost] = useState((page === "new") ? null : utils.getGlobalState().res.responses && utils.getGlobalState().res.responses[name+"FindById"]);
 
     function onUserChange(user){
         setUser((user?._id) ? user : null);
@@ -209,69 +172,62 @@ function Post(props) {
         if (page === "new"){
             setPost(null);
         } else {
-            setPost(post || utils.getGlobalState().res.responses?.postFindById)
+            setPost(post || (utils.getGlobalState().res.responses && utils.getGlobalState().res.responses[name+"FindById"]))
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page])
 
-    function getTitle() {
+    function getTitleWithPageName() {
 
         const pageName = router({user, post, page});
 
         if (pageName === "new") {
-            return appContext.titles.newPostTitle;
+            return appContext.titles["new"+capitalize(name)+"Title"];
         }
 
         if (pageName === "edit") {
-            return appContext.titles.editPostTitle;
+            return appContext.titles["edit"+capitalize(name)+"Title"];
         }
 
         if (pageName === "content") {
-            return post?.title || appContext.titles.postTitle;
+            return getTitle(post) || appContext.titles[name+"Title"];
         }
 
         return "";
 
     }
 
-    function getSubtitle() {
+    const subtitle = (page === "edit") ? null : getSubtitle(post);
+
+    function getStatus() {
+
         const isNotDeleted = post?._status_isNotDeleted;
         const isBanned = post?._status_isBanned;
         const isValidated = post?._status_isValidated;
         const isApproved = post?._status_isApproved;
         const isFeatured = post?._status_isFeatured;
-        const isAuthor = user?._id === post?._author;
+        const isAuthor = ((user?._id && user?._id === post?._author) || (user?._id && user?._id === post?._author?._id));
         const isAdmin = user?._status_isFeatured;
         const isAuthorOrAdmin = !!(isAuthor || isAdmin)
 
         if (isAuthorOrAdmin && page !== "new"){
 
-            return (
-                <>
-                    {(page === "edit") ? null : <div>{post?.subtitle}</div>}
-                    <div>
-                        {
-                            (isBanned) ?
-                                appContext.titles.statusBannedTitle :
-                                (!isNotDeleted) ?
-                                    appContext.titles.statusDeletedTitle :
-                                    (!isValidated) ?
-                                        appContext.titles.statusMissingDataTitle :
-                                        (isFeatured && isAdmin) ?
-                                            appContext.titles.statusFeaturedTitle :
-                                            (isApproved && isAdmin) ?
-                                                appContext.titles.statusApprovedTitle :
-                                                appContext.titles.statusCreatedTitle
-                        }
-                    </div>
-                </>
-            )
+            return (isBanned && isAdmin) ?
+                appContext.titles.statusBannedTitle :
+                (!isNotDeleted) ?
+                    appContext.titles.statusDeletedTitle :
+                    (!isValidated) ?
+                        appContext.titles.statusMissingDataTitle :
+                        (isFeatured && isAdmin) ?
+                            appContext.titles.statusFeaturedTitle :
+                            (isApproved && isAdmin) ?
+                                appContext.titles.statusApprovedTitle :
+                                (isAdmin) ? appContext.titles.statusCreatedTitle : null
+
         }
 
-        return (page === "edit") ? null : post?.subtitle;
+        return null;
     }
-
-    const subtitle = getSubtitle();
 
     const dialog = {
         actions: {}
@@ -281,7 +237,8 @@ function Post(props) {
         dialog.actions = actions;
     }
 
-    const menu = getMenu({
+    const menuProps = {
+        appContext,
         onDelete: function () {
             menuActions?.close();
             dialog.actions.open({
@@ -326,10 +283,11 @@ function Post(props) {
             dialog.actions.open({
                 dialogTitle: appContext.titles.dialogMarkFeaturedPostTitle,
                 dialogContent: appContext.messages.markFeaturedPostQuestion,
+                Form: FeaturedForm,
                 cancelText: appContext.labels.cancelText,
                 submitText: appContext.labels.markText,
-                onSubmit: async function () {
-                    return await utils.sendRequest({requestName: name+"Featured", args: {_id: post?._id}, redirect: {pathname: parentRoute+"/"+post._id, search:"", hash:""}, timeOut:1000 });
+                onSubmit: async function (e, formData) {
+                    return await utils.sendRequest({requestName: name+"Featured", args: formData, redirect: {pathname: parentRoute+"/"+post._id, search:"", hash:""}, timeOut:1000 });
                 },
                 successMessage: appContext.messages.markFeaturedPostSuccess,
             })
@@ -348,7 +306,9 @@ function Post(props) {
                 successMessage: appContext.messages.removeMarkFeaturedPostSuccess
             })
         }
-    })
+    };
+
+    const menu = (getMenu) ? getMenu(menuProps) : getDefaultMenu(menuProps);
 
     const pageName = router({user, post, page});
 
@@ -358,33 +318,106 @@ function Post(props) {
 
     let menuActions = null;
 
+    const avatarClick = (e) => {
+        const author = getAuthorObject();
+        wapp.client.history.push({pathname: appContext.routes.userRoute + "/" + author._id, search:"", hash:""})
+    }
+
+    function getAuthorObject() {
+        return (post?._id && post?._author === post?._id && post?.name) ? post : (post?._author?._id) ? post?._author : null;
+    }
+
     return (
         <>
             {
                 (pageName) ?
                     <div className={style.post}>
-                        <Container fixed className={materialStyle.container} maxWidth={"lg"}>
+                        <Container fixed className={materialStyle.container} maxWidth={"sm"}>
                             <Paper elevation={3}>
+                                {(layoutType === "user") ?
+                                    <div className={style.userLayout}>
+                                        <div className={style.userBox}>
+                                            {(getAuthorObject()) ?
+                                                <div className={style.avatarContainer} onClick={avatarClick}>
+                                                    <Avatar user={getAuthorObject()} size={"big"}/>
+                                                </div>
+                                                : null
+                                            }
+                                            <div className={style.titleContainer}>
+                                                <div className={style.title}>
+                                                    <Typography variant={"h5"} className={materialStyle.title}>
+                                                        {getTitleWithPageName()}
+                                                    </Typography>
+                                                </div>
+                                                {(subtitle) ?
+                                                    <div className={style.subtitle}>
+                                                        <Typography variant={"subtitle1"} color={"textSecondary"} className={materialStyle.subtitle}>
+                                                            {subtitle}
+                                                        </Typography>
+                                                    </div>
+                                                    :
+                                                    null
+                                                }
+                                                {(getStatus()) ?
+                                                    <div className={style.status}>
+                                                        <Typography variant={"subtitle1"} color={"textSecondary"} className={materialStyle.subtitle}>
+                                                            {getStatus()}
+                                                        </Typography>
+                                                    </div>
+                                                    :
+                                                    null
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                    : null
+                                }
                                 <AppBar position={"relative"}
                                         className={materialStyle.appBar}
                                 >
                                     <Toolbar>
-                                        <div className={style.titleContainer}>
-                                            <div className={style.title}>
-                                                <Typography variant="h6" className={materialStyle.title}>
-                                                    {getTitle()}
-                                                </Typography>
-                                            </div>
-                                            {(subtitle) ?
-                                                <div className={style.subtitle}>
-                                                    <Typography variant="subtitle1" color="textSecondary" className={materialStyle.subtitle}>
-                                                        {subtitle}
+                                        {
+                                            (layoutType !== "user") ?
+                                                <>
+                                                    {(getAuthorObject()) ?
+                                                        <div className={style.avatarContainer} onClick={avatarClick}>
+                                                            <Avatar user={getAuthorObject()} />
+                                                        </div>
+                                                        : null
+                                                    }
+                                                    <div className={style.titleContainer}>
+                                                        <div className={style.title}>
+                                                            <Typography variant={"h6"} className={materialStyle.title}>
+                                                                {getTitleWithPageName()}
+                                                            </Typography>
+                                                        </div>
+                                                        {(subtitle) ?
+                                                            <div className={style.subtitle}>
+                                                                <Typography variant={"subtitle1"} color={"textSecondary"} className={materialStyle.subtitle}>
+                                                                    {subtitle}
+                                                                </Typography>
+                                                            </div>
+                                                            :
+                                                            null
+                                                        }
+                                                        {(getStatus()) ?
+                                                            <div className={style.status}>
+                                                                <Typography variant={"subtitle1"} color={"textSecondary"} className={materialStyle.subtitle}>
+                                                                    {getStatus()}
+                                                                </Typography>
+                                                            </div>
+                                                            :
+                                                            null
+                                                        }
+                                                    </div>
+                                                </>
+                                                :
+                                                <div className={style.titleContainer} >
+                                                    <Typography variant={"h6"} className={materialStyle.title}>
+                                                        {appContext.titles.dashboardTitle}
                                                     </Typography>
                                                 </div>
-                                                :
-                                                null
-                                            }
-                                        </div>
+                                        }
                                         <Menu
                                             parentRoute={parentRoute}
                                             menu={menu}
@@ -398,7 +431,7 @@ function Post(props) {
                                 </AppBar>
                                 <PostContext.Provider value={{name, user, post, parentRoute}}>
                                     <div className={style.content}>
-                                        <Router page={page}/>
+                                        <Router page={page} pages={pages}/>
                                     </div>
                                     <Dialog effect={dialogEffect} />
                                 </PostContext.Provider>

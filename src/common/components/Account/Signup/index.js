@@ -9,6 +9,7 @@ import Form from "../../Form";
 import materialStyle from "./materialStyle";
 import style from "./style.css";
 import AccountContext from "../context";
+import AppContext from "../../App/context";
 
 function Signup(props) {
 
@@ -18,6 +19,7 @@ function Signup(props) {
     const {user, parentRoute, name} = accountContext;
 
     const context = useContext(WappContext);
+    const appContext = useContext(AppContext);
     const utils = getUtils(context);
 
     // eslint-disable-next-line no-unused-vars
@@ -28,7 +30,7 @@ function Signup(props) {
     const query = req.wappRequest.query;
 
     async function onSubmit(e, formData) {
-        return await utils.signup({requestName: name+"Signup", args: formData, redirect: {pathname: query.redirect || parentRoute, search:"", hash:""}});
+        return await utils.signup({requestName: name+"Signup", args: formData, redirect: {pathname: query.redirect || appContext.routes.userRoute+"/:_id", search:"", hash:""}});
     }
 
     let formDataFromResolvers = {};

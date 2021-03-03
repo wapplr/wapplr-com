@@ -21,16 +21,22 @@ import AccountContext from "./context";
 
 import Login from "./Login";
 import Signup from "./Signup";
-import Profile from "./Profile";
+import Settings from "./Settings";
 import ForgotPassword from "./ForgotPassword";
 import ResetPassword from "./ResetPassword";
 import ChangeData from "./ChangeData";
 import ChangeEmail from "./ChangeEmail";
 import ChangePassword from "./ChangePassword";
 import EmailConfirmation from "./EmailConfirmation";
+import DeleteAccount from "./DeleteAccount";
+import Logout from "./Logout";
 
-import menu from "./menu";
+import getMenu from "./menu";
 import NotFound from "../NotFound";
+import Avatar from "../Avatar/me";
+import getUserName from "../../utils/getUserName";
+import IconButton from "@material-ui/core/IconButton";
+import CancelIcon from "@material-ui/icons/Cancel";
 
 const pages = {
     forgotpassword: ForgotPassword,
@@ -39,20 +45,22 @@ const pages = {
     changeemail: ChangeEmail,
     changepassword: ChangePassword,
     emailconfirmation: EmailConfirmation,
-    profile: Profile,
+    deleteaccount: DeleteAccount,
+    settings: Settings,
     signup: Signup,
-    login: Login
+    login: Login,
+    logout: Logout
 };
 
 function router({user, page}) {
 
     function renderWithUser() {
         if (!page) {
-            return "profile";
+            return "settings";
         }
-        if (["forgotpassword", "resetpassword", "changedata", "changeemail", "changepassword", "emailconfirmation", "logout", "login", "signup"].indexOf(page) > -1){
-            if (page === "logout" || page === "login" || page === "signup"){
-                return "profile"
+        if (["forgotpassword", "resetpassword", "changedata", "changeemail", "changepassword", "emailconfirmation", "logout", "login", "signup", "deleteaccount"].indexOf(page) > -1){
+            if (page === "login" || page === "signup"){
+                return "settings"
             }
             return page;
         }
@@ -99,7 +107,7 @@ function Account(props) {
     const utils = getUtils(context);
     const {subscribe, materialStyle} = props;
 
-    const {wapp, req, res} = context;
+    const {wapp, res} = context;
 
     wapp.styles.use(style);
 
@@ -150,8 +158,20 @@ function Account(props) {
             return appContext.titles.forgotPasswordTitle;
         }
 
+        if (pageName === "changepassword") {
+            return appContext.titles.changePasswordTitle;
+        }
+
         if (pageName === "emailconfirmation") {
             return appContext.titles.emailConfirmationTitle;
+        }
+
+        if (pageName === "deleteaccount") {
+            return appContext.titles.deleteAccountTitle;
+        }
+
+        if (pageName === "settings") {
+            return appContext.titles.accountTitle;
         }
 
         return "";
@@ -165,12 +185,59 @@ function Account(props) {
         res.wappResponse.status(404)
     }
 
+    const userName = getUserName(user);
+
+    function getStatus() {
+
+        const isNotDeleted = user?._status_isNotDeleted;
+        const isValidated = user?._status_isValidated;
+
+        return (!isNotDeleted) ?
+            appContext.titles.statusDeletedTitle :
+            (!isValidated) ?
+                appContext.titles.statusMissingDataTitle :
+                null
+    }
+
+    const avatarClick = (e) => {
+        wapp.client.history.push({pathname: appContext.routes.userRoute + "/" + user._id, search:"", hash:""})
+    }
+
+    const backClick = (e) => {
+        wapp.client.history.push({pathname: (pageName === "settings") ? appContext.routes.userRoute + "/" + user._id : appContext.routes.accountRoute, search:"", hash:""})
+    }
+
     return (
         <>
             {(pageName) ?
                 <div className={style.account}>
                     <Container fixed className={materialStyle.container} maxWidth={"sm"}>
                         <Paper elevation={3}>
+                            {
+                                (user?._id) ?
+                                    <div>
+                                        <div className={style.userBox}>
+                                            <div className={style.avatar} onClick={avatarClick}>
+                                                <Avatar size={"big"}/>
+                                            </div>
+                                            <div className={style.userName} onClick={avatarClick}>
+                                                <Typography variant="h5" >
+                                                    {userName}
+                                                </Typography>
+                                            </div>
+                                            {(getStatus()) ?
+                                                <div className={style.status}>
+                                                    <Typography variant={"subtitle1"} color={"textSecondary"} >
+                                                        {getStatus()}
+                                                    </Typography>
+                                                </div>
+                                                :
+                                                null
+                                            }
+                                        </div>
+                                    </div>
+                                    : null
+                            }
                             <AppBar position={"relative"}
                                     className={materialStyle.appBar}
                             >
@@ -182,15 +249,31 @@ function Account(props) {
                                             </Typography>
                                         </div>
                                     </div>
-                                    <Menu
-                                        parentRoute={parentRoute}
-                                        menu={menu}
-                                        materialStyle={materialStyle}
-                                        menuProperties={{user, page}}
-                                    />
+                                    {(user?._id && pageName !== "settings") ?
+                                        <div>
+                                            <IconButton
+                                                color={"inherit"}
+                                                onClick={backClick}
+                                            >
+                                                <CancelIcon />
+                                            </IconButton>
+                                        </div>
+                                        :
+                                        null
+                                    }
+                                    {(pageName !== "settings") ?
+                                        <Menu
+                                            parentRoute={parentRoute}
+                                            menu={getMenu({appContext})}
+                                            materialStyle={materialStyle}
+                                            menuProperties={{user, page}}
+                                        />
+                                        :
+                                        null
+                                    }
                                 </Toolbar>
                             </AppBar>
-                            <AccountContext.Provider value={{user, parentRoute, name:"user"}}>
+                            <AccountContext.Provider value={{user, parentRoute, name:"user", page}}>
                                 <div className={style.content}>
                                     <Router page={page}/>
                                 </div>

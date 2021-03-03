@@ -6,6 +6,7 @@ const messages = {
     changeDataSuccessMessage: "Your data has been updated",
     emailConfirmationSuccessMessage: "Your email has been confirmed",
     emailConfirmationSendAgainSuccessMessage: "Your email confirmation key has been sent again",
+    deleteAccountSuccessMessage: "Your account has been deleted",
     savePostSuccessMessage: "The post has been updated",
     newPostSuccessMessage: "The new post has been saved",
     validationPostTitle: "Minimum 1 max 250 characters",
@@ -22,7 +23,9 @@ const messages = {
     markFeaturedPostSuccess: "The post has been marked to featured",
     markFeaturedPostQuestion: "Are you sure want to mark this post to featured?",
     removeMarkFeaturedPostSuccess: "The featured mark of the post has been removed",
-    removeMarkFeaturedPostQuestion: "Are you sure want to remove featured mark of this post?"
+    removeMarkFeaturedPostQuestion: "Are you sure want to remove featured mark of this post?",
+    deleteAccountQuestion: "Are you sure want to delete your account?",
+    deleteAccountSuccess: "Your account has beed deleted"
 };
 
 export default messages;
