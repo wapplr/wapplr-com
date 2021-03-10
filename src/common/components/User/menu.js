@@ -1,5 +1,7 @@
-import getPostMenu from "../Post/menu"
-import SettingsIcon from "@material-ui/icons/Settings";
+import getPostMenu from "../Post/menu";
+import DescriptionIcon from '@material-ui/icons/Description';
+import AccountCircleIcon from "@material-ui/icons/AccountCircle";
+import DeleteIcon from "@material-ui/icons/Delete";
 
 function getMenu(props = {}) {
 
@@ -20,24 +22,55 @@ function getMenu(props = {}) {
             m.featured = false;
         }
         return m;
-    })
+    });
 
     return [
         {
-            name: menus.accountSettingsMenu,
+            name: function (p) {
+                const isAuthor = ((p?.user?._id && p?.user?._id === p?.post?._author) || (p?.user?._id && p?.user?._id === p?.post?._author?._id));
+                return (isAuthor) ? menus.dashboardMenu : menus.userProfileMenu;
+            },
             href: function (p) {
-                return routes.accountRoute;
+                return (p?.post?._id) ? "/"+p.post._id : "/"
+            },
+            role: function (p) {
+                return true;
+            },
+            Icon: AccountCircleIcon,
+        },
+        {
+            name: function (p) {
+                const isAuthor = ((p?.user?._id && p?.user?._id === p?.post?._author) || (p?.user?._id && p?.user?._id === p?.post?._author?._id));
+                return (isAuthor) ? menus.myPostsMenu : menus.userPostsMenu;
+            },
+            href: function (p) {
+                return (p?.post?._id) ? "/"+p.post._id + routes.userPostsRoute : routes.userPostsRoute;
+            },
+            role: function (p) {
+                return true;
+            },
+            Icon: DescriptionIcon,
+        },
+        {
+            name: function (p) {
+                return menus.deletedPostsMenu;
+            },
+            href: function (p) {
+                return (p?.post?._id) ? "/"+p.post._id + routes.userPostsRoute+"/deleted" : routes.userPostsRoute+"/deleted"
             },
             role: function (p) {
                 const isAuthor = ((p?.user?._id && p?.user?._id === p?.post?._author) || (p?.user?._id && p?.user?._id === p?.post?._author?._id));
-                if (isAuthor) {
-                    return !!(p?.post?._id && p.page !== "edit" && p.page !== "new");
+                const isAdmin = p?.user?._status_isFeatured;
+                const isPostsPage = (p?.page === "posts" && !p?.pageType);
+                if (isPostsPage) {
+                    if (isAuthor || isAdmin) {
+                        return true;
+                    }
                 }
                 return false;
             },
-            Icon: SettingsIcon,
-            disableParentRoute: true,
-            featured: true
+            Icon: DeleteIcon,
+            featured: true,
         },
         ...filtered
     ];

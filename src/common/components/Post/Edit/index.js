@@ -23,10 +23,12 @@ function Edit(props) {
     // eslint-disable-next-line no-unused-vars
     const {materialStyle} = props;
 
-    const {wapp} = context;
+    const {wapp, req} = context;
+
+    const query = req.wappRequest.query;
 
     async function onSubmit(e, formData) {
-        return await utils.sendRequest({requestName: name+"Save", args: formData, redirect: {pathname: parentRoute+"/"+post._id, search:"", hash:""}, timeOut:1000 });
+        return await utils.sendRequest({requestName: name+"Save", args: formData, redirect: {pathname: query.redirect || parentRoute+"/"+post._id, search:"", hash:""}, timeOut:1000 });
     }
 
     let formDataFromResolvers = {};
@@ -43,7 +45,7 @@ function Edit(props) {
         submit: {
             label: (isNotDeleted) ? appContext.labels.savePostSubmitLabel : appContext.labels.restorePostSubmitLabel
         }
-    }
+    };
 
     if (post?._id){
         formData._id.value = post._id;
@@ -63,7 +65,7 @@ function Edit(props) {
                             value = null;
                         }
                     }
-                })
+                });
                 if (value){
                     formData[key].value = value;
                 }

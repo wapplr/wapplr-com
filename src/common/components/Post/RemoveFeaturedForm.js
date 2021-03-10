@@ -27,7 +27,7 @@ function RemoveFeaturedForm(props) {
 
     const formData = {
         ...formDataFromResolvers,
-    }
+    };
 
     delete formData.submit;
 

@@ -21,39 +21,54 @@ import style from "./style.css";
 import materialStyle from "./materialStyle";
 
 import PostContext from "./context";
-import getDefaultMenu from "./menu";
+import getDefaultMenu, {getMenuProps} from "./menu";
+import getStatus from "./status";
 
 import New from "./New";
 import Edit from "./Edit";
 import Content from "./Content";
-import RemoveFeaturedForm from "./RemoveFeaturedForm";
-import FeaturedForm from "./FeaturedForm";
 
 const defaultPages = {
     content: Content,
     new: New,
     edit: Edit,
-}
+};
 
-function router({user, post, page}) {
+export function showPageOrNotFound({user, post, page}) {
 
     const isAdmin = user?._status_isFeatured;
     const isAuthor = ((user?._id && user?._id === post?._author) || (user?._id && user?._id === post?._author?._id));
     const isAdminOrAuthor = (isAdmin || isAuthor);
     const isNotDeleted = post?._status_isNotDeleted;
     const isBanned = post?._status_isBanned;
-    const isFeatured = post?._status_isFeatured;
     const postId = post?._id;
+    const authorIsNotDeleted = post?._author_status_isNotDeleted;
 
     if (isBanned && !isAdmin){
+        return false;
+    }
+
+    if (!authorIsNotDeleted && !isAdmin && page !== "new"){
+        return false;
+    }
+
+    return !!((isNotDeleted && postId) || (!isNotDeleted && isAdminOrAuthor && postId) || (user?._id && user?._status_isNotDeleted && page === "new"));
+
+}
+
+export function defaultRouter({user, post, page}) {
+
+    const show = showPageOrNotFound({user, post, page});
+
+    if (!show) {
         return null;
     }
 
-    const show = !!((isNotDeleted && postId) || (!isNotDeleted && isAdminOrAuthor && postId) || (user?._id && user?._status_isNotDeleted && page === "new"));
-
-    if (!show) {
-        return null
-    }
+    const isAdmin = user?._status_isFeatured;
+    const isAuthor = ((user?._id && user?._id === post?._author) || (user?._id && user?._id === post?._author?._id));
+    const isAdminOrAuthor = (isAdmin || isAuthor);
+    const isFeatured = post?._status_isFeatured;
+    const postId = post?._id;
 
     function renderWithUser() {
         switch (page) {
@@ -85,9 +100,9 @@ function Router(props) {
 
     const postContext = useContext(PostContext);
     const {user, post} = postContext;
-    const {page, pages} = props;
+    const {page, pages, router} = props;
 
-    const pageName = router({user, post, page})
+    const pageName = router({user, post, page});
     const Page = (pageName) ? pages[pageName] : null;
 
     return (Page) ? <Page /> : null;
@@ -95,7 +110,7 @@ function Router(props) {
 
 const capitalize = (s) => {
     return s.charAt(0).toUpperCase() + s.slice(1)
-}
+};
 
 function Post(props) {
 
@@ -105,12 +120,16 @@ function Post(props) {
     const {
         parentRoute = appContext.routes.postRoute,
         name = "post",
-        getTitle = function (post) {return post?.title},
-        getSubtitle = function (post) {return post?.subtitle},
+        getTitle = function ({post}) {return post?.title},
+        getSubtitle = function ({post}) {return post?.subtitle},
         getMenu,
+        menuProperties,
         pages = defaultPages,
         layoutType,
-        maxWidth = "lg"
+        topMenu,
+        maxWidth = "lg",
+        router = defaultRouter,
+        dashboardTitle = function ({post}) {return appContext.titles.dashboardTitle}
     } = props;
 
     const utils = getUtils(context);
@@ -131,20 +150,12 @@ function Post(props) {
     }
 
     function onRequestResolved({value}) {
-        const keys = [name+"New", name+"Save", name+"Delete", name+"Approve", name+"Featured", name+"RemoveFeatured", name+"Ban", name+"FindById"];
+        const keys = [name+"FindById"];
         const response = value;
         let foundEnabledKeys = false;
         keys.forEach(function (requestName) {
             if (!foundEnabledKeys && response && response[requestName]){
                 foundEnabledKeys = true;
-                if (requestName !== name+"FindById" && typeof response[requestName].record !== "undefined" && !response[requestName].error){
-                    res.wappResponse.store.dispatch(wapp.states.stateManager.actions.res({
-                        type: "INS_RES",
-                        name: "responses",
-                        value: {[name+"FindById"]: response[requestName].record}
-                    }));
-                    res.wappResponse.state = res.wappResponse.store.getState();
-                }
                 if (requestName === name+"FindById"){
                     const newPost = {...response[requestName]};
                     setPost(newPost);
@@ -159,7 +170,7 @@ function Post(props) {
             unsub();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user])
+    }, [user]);
 
     useEffect(function (){
         const unsub = subscribe.requestResolved(onRequestResolved);
@@ -167,7 +178,7 @@ function Post(props) {
             unsub();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [post])
+    }, [post]);
 
     useEffect(function (){
         if (page === "new"){
@@ -176,7 +187,7 @@ function Post(props) {
             setPost(post || (utils.getGlobalState().res.responses && utils.getGlobalState().res.responses[name+"FindById"]))
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [page])
+    }, [page]);
 
     function getTitleWithPageName() {
 
@@ -191,44 +202,14 @@ function Post(props) {
         }
 
         if (pageName === "content") {
-            return getTitle(post) || appContext.titles[name+"Title"];
+            return getTitle({user, post, page}) || appContext.titles[name+"Title"];
         }
 
-        return "";
+        return getTitle({user, post, page}) || appContext.titles[name+"Title"] || "";
 
     }
 
-    const subtitle = (page === "edit") ? null : getSubtitle(post);
-
-    function getStatus() {
-
-        const isNotDeleted = post?._status_isNotDeleted;
-        const isBanned = post?._status_isBanned;
-        const isValidated = post?._status_isValidated;
-        const isApproved = post?._status_isApproved;
-        const isFeatured = post?._status_isFeatured;
-        const isAuthor = ((user?._id && user?._id === post?._author) || (user?._id && user?._id === post?._author?._id));
-        const isAdmin = user?._status_isFeatured;
-        const isAuthorOrAdmin = !!(isAuthor || isAdmin)
-
-        if (isAuthorOrAdmin && page !== "new"){
-
-            return (isBanned && isAdmin) ?
-                appContext.titles.statusBannedTitle :
-                (!isNotDeleted) ?
-                    appContext.titles.statusDeletedTitle :
-                    (!isValidated) ?
-                        appContext.titles.statusMissingDataTitle :
-                        (isFeatured && isAdmin) ?
-                            appContext.titles.statusFeaturedTitle :
-                            (isApproved && isAdmin) ?
-                                appContext.titles.statusApprovedTitle :
-                                (isAdmin) ? appContext.titles.statusCreatedTitle : null
-
-        }
-
-        return null;
-    }
+    const subtitle = (page === "edit") ? null : getSubtitle({user, post, page});
 
     const dialog = {
         actions: {}
@@ -236,78 +217,11 @@ function Post(props) {
 
     const dialogEffect = function ({actions}) {
         dialog.actions = actions;
-    }
-
-    const menuProps = {
-        appContext,
-        onDelete: function () {
-            menuActions?.close();
-            dialog.actions.open({
-                dialogTitle: appContext.titles.dialogDeletePostTitle,
-                dialogContent: appContext.messages.deletePostQuestion,
-                cancelText: appContext.labels.cancelText,
-                submitText: appContext.labels.deleteText,
-                onSubmit: async function () {
-                    return await utils.sendRequest({requestName: name+"Delete", args: {_id: post?._id}, redirect: {pathname: parentRoute+"/"+post._id, search:"", hash:""}, timeOut:1000 });
-                },
-                successMessage: appContext.messages.deletePostSuccess
-            })
-        },
-        onBan: function () {
-            menuActions?.close();
-            dialog.actions.open({
-                dialogTitle: appContext.titles.dialogBanPostTitle,
-                dialogContent: appContext.messages.banPostQuestion,
-                cancelText: appContext.labels.cancelText,
-                submitText: appContext.labels.banText,
-                onSubmit: async function () {
-                    return await utils.sendRequest({requestName: name+"Ban", args: {_id: post?._id}, redirect: {pathname: parentRoute+"/"+post._id, search:"", hash:""}, timeOut:1000 });
-                },
-                successMessage: appContext.messages.banPostSuccess,
-            })
-        },
-        onApprove: function () {
-            menuActions?.close();
-            dialog.actions.open({
-                dialogTitle: appContext.titles.dialogApprovePostTitle,
-                dialogContent: appContext.messages.approvePostQuestion,
-                cancelText: appContext.labels.cancelText,
-                submitText: appContext.labels.approveText,
-                onSubmit: async function () {
-                    return await utils.sendRequest({requestName: name+"Approve", args: {_id: post?._id}, redirect: {pathname: parentRoute+"/"+post._id, search:"", hash:""}, timeOut:1000 });
-                },
-                successMessage: appContext.messages.approvePostSuccess,
-            })
-        },
-        onFeatured: function () {
-            menuActions?.close();
-            dialog.actions.open({
-                dialogTitle: appContext.titles.dialogMarkFeaturedPostTitle,
-                dialogContent: appContext.messages.markFeaturedPostQuestion,
-                Form: FeaturedForm,
-                cancelText: appContext.labels.cancelText,
-                submitText: appContext.labels.markText,
-                onSubmit: async function (e, formData) {
-                    return await utils.sendRequest({requestName: name+"Featured", args: formData, redirect: {pathname: parentRoute+"/"+post._id, search:"", hash:""}, timeOut:1000 });
-                },
-                successMessage: appContext.messages.markFeaturedPostSuccess,
-            })
-        },
-        onRemoveFeatured: function () {
-            menuActions?.close();
-            dialog.actions.open({
-                dialogTitle: appContext.titles.dialogRemoveMarkFeaturedPostTitle,
-                dialogContent: appContext.messages.removeMarkFeaturedPostQuestion,
-                Form: RemoveFeaturedForm,
-                cancelText: appContext.labels.cancelText,
-                submitText: appContext.labels.removeMarkText,
-                onSubmit: async function (e, formData) {
-                    return await utils.sendRequest({requestName: name+"RemoveFeatured", args: formData, redirect: {pathname: parentRoute+"/"+post._id, search:"", hash:""}, timeOut:1000 });
-                },
-                successMessage: appContext.messages.removeMarkFeaturedPostSuccess
-            })
-        }
     };
+
+    let menuActions = {};
+
+    const menuProps = getMenuProps({appContext, menuActions, dialog, utils, name, post, parentRoute});
 
     const menu = (getMenu) ? getMenu(menuProps) : getDefaultMenu(menuProps);
 
@@ -317,12 +231,10 @@ function Post(props) {
         res.wappResponse.status(404)
     }
 
-    let menuActions = null;
-
     const avatarClick = (e) => {
         const author = getAuthorObject();
         wapp.client.history.push({pathname: appContext.routes.userRoute + "/" + author._id, search:"", hash:""})
-    }
+    };
 
     function getAuthorObject() {
         return (post?._id && post?._author === post?._id && post?.name) ? post : (post?._author?._id) ? post?._author : null;
@@ -337,13 +249,23 @@ function Post(props) {
                             <Paper elevation={3}>
                                 {(layoutType === "user") ?
                                     <div className={style.userLayout}>
-                                        <div className={style.userBox}>
-                                            {(getAuthorObject()) ?
-                                                <div className={style.avatarContainer} onClick={avatarClick}>
-                                                    <Avatar user={getAuthorObject()} size={"big"}/>
+                                        {
+                                            (topMenu?.length) ?
+                                                <div className={style.topMenu}>
+                                                    <Menu
+                                                        parentRoute={parentRoute}
+                                                        menu={topMenu}
+                                                        materialStyle={materialStyle}
+                                                        menuProperties={{user, post, page, ...menuProperties}}
+                                                    />
                                                 </div>
-                                                : null
-                                            }
+                                                :
+                                                null
+                                        }
+                                        <div className={style.userBox}>
+                                            <div className={style.avatarContainer} onClick={avatarClick}>
+                                                <Avatar user={getAuthorObject()} size={"big"}/>
+                                            </div>
                                             <div className={style.titleContainer}>
                                                 <div className={style.title}>
                                                     <Typography variant={"h5"} className={materialStyle.title}>
@@ -359,10 +281,10 @@ function Post(props) {
                                                     :
                                                     null
                                                 }
-                                                {(getStatus()) ?
+                                                {(getStatus({user, post, page, appContext})) ?
                                                     <div className={style.status}>
                                                         <Typography variant={"subtitle1"} color={"textSecondary"} className={materialStyle.subtitle}>
-                                                            {getStatus()}
+                                                            {getStatus({user, post, page, appContext})}
                                                         </Typography>
                                                     </div>
                                                     :
@@ -401,10 +323,10 @@ function Post(props) {
                                                             :
                                                             null
                                                         }
-                                                        {(getStatus()) ?
+                                                        {(getStatus({user, post, page, appContext})) ?
                                                             <div className={style.status}>
                                                                 <Typography variant={"subtitle1"} color={"textSecondary"} className={materialStyle.subtitle}>
-                                                                    {getStatus()}
+                                                                    {getStatus({user, post, page, appContext})}
                                                                 </Typography>
                                                             </div>
                                                             :
@@ -415,7 +337,7 @@ function Post(props) {
                                                 :
                                                 <div className={style.titleContainer} >
                                                     <Typography variant={"h6"} className={materialStyle.title}>
-                                                        {appContext.titles.dashboardTitle}
+                                                        {dashboardTitle({user, post, page})}
                                                     </Typography>
                                                 </div>
                                         }
@@ -423,16 +345,16 @@ function Post(props) {
                                             parentRoute={parentRoute}
                                             menu={menu}
                                             materialStyle={materialStyle}
-                                            menuProperties={{user, post, page}}
+                                            menuProperties={{user, post, page, ...menuProperties}}
                                             effect={function ({actions}) {
-                                                menuActions = actions
+                                                menuActions.actions = actions;
                                             }}
                                         />
                                     </Toolbar>
                                 </AppBar>
                                 <PostContext.Provider value={{name, user, post, parentRoute}}>
                                     <div className={style.content}>
-                                        <Router page={page} pages={pages}/>
+                                        <Router page={page} pages={pages} router={router}/>
                                     </div>
                                     <Dialog effect={dialogEffect} />
                                 </PostContext.Provider>

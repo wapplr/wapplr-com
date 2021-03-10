@@ -138,11 +138,11 @@ function Template(props) {
 
     const avatarClick = (e) => {
         wapp.client.history.push({pathname: appContext.routes.userRoute + "/" + user._id, search:"", hash:""})
-    }
+    };
 
     const loginClick = (e) => {
         wapp.client.history.push({pathname: appContext.routes.accountRoute+"/login", search:"", hash:""})
-    }
+    };
 
     return (
 

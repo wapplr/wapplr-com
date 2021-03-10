@@ -4,6 +4,81 @@ import BlockIcon from "@material-ui/icons/Block";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import StarIcon from "@material-ui/icons/Star";
 import StarBorderIcon from "@material-ui/icons/StarBorder";
+import FeaturedForm from "./FeaturedForm";
+import RemoveFeaturedForm from "./RemoveFeaturedForm";
+
+export function getMenuProps({appContext, menuActions, dialog, utils, name, post, parentRoute, redirects= {}}) {
+    return {
+        appContext,
+        onDelete: function () {
+            menuActions?.actions.close();
+            dialog.actions.open({
+                dialogTitle: appContext.titles.dialogDeleteEntryTitle,
+                dialogContent: appContext.messages.deleteEntryQuestion,
+                cancelText: appContext.labels.cancelText,
+                submitText: appContext.labels.deleteText,
+                onSubmit: async function () {
+                    return await utils.sendRequest({requestName: name+"Delete", args: {_id: post?._id}, redirect: redirects.onDeleteSuccess || {pathname: parentRoute+"/"+post._id, search:"", hash:""}, timeOut:1000 });
+                },
+                successMessage: appContext.messages.deleteEntrySuccess
+            })
+        },
+        onBan: function () {
+            menuActions?.actions.close();
+            dialog.actions.open({
+                dialogTitle: appContext.titles.dialogBanEntryTitle,
+                dialogContent: appContext.messages.banEntryQuestion,
+                cancelText: appContext.labels.cancelText,
+                submitText: appContext.labels.banText,
+                onSubmit: async function () {
+                    return await utils.sendRequest({requestName: name+"Ban", args: {_id: post?._id}, redirect: redirects.onBanSuccess || {pathname: parentRoute+"/"+post._id, search:"", hash:""}, timeOut:1000 });
+                },
+                successMessage: appContext.messages.banEntrySuccess,
+            })
+        },
+        onApprove: function () {
+            menuActions?.actions.close();
+            dialog.actions.open({
+                dialogTitle: appContext.titles.dialogApproveEntryTitle,
+                dialogContent: appContext.messages.approveEntryQuestion,
+                cancelText: appContext.labels.cancelText,
+                submitText: appContext.labels.approveText,
+                onSubmit: async function () {
+                    return await utils.sendRequest({requestName: name+"Approve", args: {_id: post?._id}, redirect: redirects.onApproveSuccess || {pathname: parentRoute+"/"+post._id, search:"", hash:""}, timeOut:1000 });
+                },
+                successMessage: appContext.messages.approveEntrySuccess,
+            })
+        },
+        onFeatured: function () {
+            menuActions?.actions.close();
+            dialog.actions.open({
+                dialogTitle: appContext.titles.dialogMarkFeaturedEntryTitle,
+                dialogContent: appContext.messages.markFeaturedEntryQuestion,
+                Form: FeaturedForm,
+                cancelText: appContext.labels.cancelText,
+                submitText: appContext.labels.markText,
+                onSubmit: async function (e, formData) {
+                    return await utils.sendRequest({requestName: name+"Featured", args: formData, redirect: redirects.onFeaturedSuccess || {pathname: parentRoute+"/"+post._id, search:"", hash:""}, timeOut:1000 });
+                },
+                successMessage: appContext.messages.markFeaturedEntrySuccess,
+            })
+        },
+        onRemoveFeatured: function () {
+            menuActions?.actions.close();
+            dialog.actions.open({
+                dialogTitle: appContext.titles.dialogRemoveMarkFeaturedEntryTitle,
+                dialogContent: appContext.messages.removeMarkFeaturedEntryQuestion,
+                Form: RemoveFeaturedForm,
+                cancelText: appContext.labels.cancelText,
+                submitText: appContext.labels.removeMarkText,
+                onSubmit: async function (e, formData) {
+                    return await utils.sendRequest({requestName: name+"RemoveFeatured", args: formData, redirect: redirects.onRemoveFeaturedSuccess || {pathname: parentRoute+"/"+post._id, search:"", hash:""}, timeOut:1000 });
+                },
+                successMessage: appContext.messages.removeMarkFeaturedEntrySuccess
+            })
+        }
+    };
+}
 
 function getMenu(props = {}) {
 
@@ -14,7 +89,7 @@ function getMenu(props = {}) {
         {
             name: menus.editMenu,
             href: function (p) {
-                return (p?.post?._id) ? "/" + p.post._id + "/edit" : "/";
+                return (props.getEditHref) ? props.getEditHref(p) : (p?.post?._id) ? "/" + p.post._id + "/edit" : "/";
             },
             role: function (p) {
                 const isAdmin = p?.user?._status_isFeatured;

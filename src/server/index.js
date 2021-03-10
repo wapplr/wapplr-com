@@ -13,12 +13,12 @@ import messages from "../common/config/constants/messages";
 import {getConfig as getCommonConfig} from "../common/config";
 import favicon from "./images/icon_192x192.png";
 
+import getPostStatusManager from "../common/config/statuses/post";
+import getUserStatusManager from "../common/config/statuses/user";
+
 import bodyParser from "body-parser";
 import nodeFetch from "node-fetch";
-import url from "url";
-
-import getDefaultStatusManager from "../common/config/statuses";
-import getPostStatusManager from "../common/config/statuses/post";
+import {URL} from "url";
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
@@ -30,7 +30,7 @@ export function getConfig(p = {}) {
     const serverConfig = config.server || {};
     const commonConfig = getCommonConfig(p).config;
 
-    const common = {...commonConfig.common}
+    const common = {...commonConfig.common};
     const globals = {...commonConfig.globals};
 
     const server = {
@@ -40,10 +40,21 @@ export function getConfig(p = {}) {
         database: {
             mongoConnectionString: "mongodb://localhost/wapplr-com",
         }
-    }
+    };
 
     const dirname = globals.ROOT || __dirname;
     const credentialsFolder = "secure/";
+
+    if (
+        !globals.DEV &&
+        fs.existsSync(path.resolve(dirname, credentialsFolder, "wapplr.com.crt")) &&
+        fs.existsSync(path.resolve(dirname, credentialsFolder, "wapplr.com.key"))
+    ){
+        server.credentials = {
+            key: fs.readFileSync(path.resolve(dirname, credentialsFolder, "wapplr.com.key"), "utf8"),
+            cert: fs.readFileSync(path.resolve(dirname, credentialsFolder, "wapplr.com.crt"), "utf8"),
+        }
+    }
 
     let secret = null;
 
@@ -83,14 +94,6 @@ export default async function createServer(p = {}) {
     const {config} = getConfig(p);
     const wapp = p.wapp || wapplrServer({...p, config});
 
-    wapp.requests.requestManager.fetch = async function (urlString, options) {
-        const absoluteUrl = (!url.parse(urlString).hostname) ?
-            wapp.request.protocol + "//" + wapp.request.hostname + urlString :
-            urlString;
-
-        return await nodeFetch(absoluteUrl, options);
-    };
-
     wapplrMongo({wapp});
     wapplrPostTypes({wapp});
     wapplrAuthentication({wapp});
@@ -106,7 +109,7 @@ export default async function createServer(p = {}) {
             email: "admin@wapplr.com",
             password: config.server.adminPassword
         },
-        statusManager: getDefaultStatusManager(),
+        statusManager: getUserStatusManager(),
         config: {
             cookieSecret: config.server.cookieSecret,
             masterCode: config.server.masterCode,
@@ -121,25 +124,25 @@ export default async function createServer(p = {}) {
                     if (type === "signup"){
                         const emailConfirmationRoute = routes.accountRoute + "/emailconfirmation";
                         const user = data;
-                        const url = protocol + "://" + hostname + emailConfirmationRoute + "/?hash=" + encodeURIComponent(user.emailConfirmationKey) + "&email=" + encodeURIComponent(user.email) + ""
+                        const url = protocol + "://" + hostname + emailConfirmationRoute + "/?hash=" + encodeURIComponent(user.emailConfirmationKey) + "&email=" + encodeURIComponent(user.email) + "";
                         console.log(url);
                     }
                     if (type === "forgotPassword") {
                         const resetPasswordRoute = routes.accountRoute + "/resetpassword";
                         const user = data;
-                        const url = protocol + "://" + hostname + resetPasswordRoute + "/?hash=" + encodeURIComponent(user.passwordRecoveryKey) + "&email=" + encodeURIComponent(user.email) + ""
+                        const url = protocol + "://" + hostname + resetPasswordRoute + "/?hash=" + encodeURIComponent(user.passwordRecoveryKey) + "&email=" + encodeURIComponent(user.email) + "";
                         console.log(url);
                     }
                     if (type === "emailConfirmation"){
                         const emailConfirmationRoute = routes.accountRoute + "/emailconfirmation";
                         const user = data;
-                        const url = protocol + "://" + hostname + emailConfirmationRoute + "/?hash=" + encodeURIComponent(user.emailConfirmationKey) + "&email=" + encodeURIComponent(user.email) + ""
+                        const url = protocol + "://" + hostname + emailConfirmationRoute + "/?hash=" + encodeURIComponent(user.emailConfirmationKey) + "&email=" + encodeURIComponent(user.email) + "";
                         console.log(url);
                     }
                 }
             },
         }
-    }
+    };
 
     await wapp.server.authentications.getAuthentication(authSettings);
 
@@ -204,13 +207,13 @@ export default async function createServer(p = {}) {
 
             }
         }
-    })
+    });
 
     wapplrGraphql({wapp}).init();
 
     wapp.contents.addComponent({
         head: Head
-    })
+    });
 
     setContents({wapp});
 
@@ -221,13 +224,21 @@ export default async function createServer(p = {}) {
 export async function createMiddleware(p = {}) {
 
     const wapp = p.wapp || await createServer(p);
+
     return [
         function createFetch(req, res, next) {
-            wapp.requests.requestManager.fetch = async function (urlString, options) {
-                const absoluteUrl = (!url.parse(urlString).hostname) ?
+
+            wapp.requests.requestManager.fetch = async function fetch(urlString, options) {
+                let hostname = "";
+                try {
+                    hostname = new URL(urlString).hostname
+                } catch (e){}
+
+                const absoluteUrl = (!hostname) ?
                     req.wappRequest.protocol + "://" + req.wappRequest.hostname + urlString :
                     urlString;
-                return await nodeFetch(absoluteUrl, options);
+
+                return await nodeFetch(absoluteUrl, {...options});
             };
             next();
         },
@@ -247,7 +258,7 @@ const defaultConfig = {
             ROOT: (typeof ROOT !== "undefined") ? ROOT : __dirname
         }
     }
-}
+};
 
 export async function run(p = defaultConfig) {
 

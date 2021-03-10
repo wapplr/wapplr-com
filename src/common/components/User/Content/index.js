@@ -1,4 +1,4 @@
-import React, {useContext, useRef} from "react";
+import React, {useContext} from "react";
 
 import {WappContext, withWapp} from "wapplr-react/dist/common/Wapp";
 import getUtils from "wapplr-react/dist/common/Wapp/getUtils";
@@ -14,7 +14,6 @@ import style from "./style.css";
 
 function Content(props) {
 
-    const container = useRef()
     const postContext = useContext(PostContext);
     // eslint-disable-next-line no-unused-vars
     const {user, post, name, parentRoute} = postContext;
@@ -31,13 +30,13 @@ function Content(props) {
     wapp.styles.use(style);
 
     return (
-        <div className={style.post} ref={container}>
+        <div className={style.post}>
             <div className={style.content}>
                 <Menu
                     parentRoute={parentRoute}
                     menu={getMenu({appContext})}
                     materialStyle={materialStyle}
-                    menuProperties={{user}}
+                    menuProperties={{user, post}}
                     list={true}
                 />
             </div>

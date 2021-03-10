@@ -1,7 +1,6 @@
 const menus = {
     loginMenu: "Login",
     signupMenu: "Signup",
-    myProfileMenu: "My profile",
     changeData: "Change data",
     changeEmail: "Change email",
     emailConfirmation: "Email confirmation",
@@ -20,7 +19,12 @@ const menus = {
     approveMenu: "Approve",
     featuredMenu: "Mark featured",
     removeFeaturedMenu: "Remove featured",
-    accountSettingsMenu: "Account settings"
-}
+    accountSettingsMenu: "Account settings",
+    userPostsMenu: "User posts",
+    myPostsMenu: "My posts",
+    dashboardMenu: "Dashboard",
+    userProfileMenu: "User profile",
+    deletedPostsMenu: "Deleted posts",
+};
 
 export default menus;

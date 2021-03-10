@@ -41,7 +41,7 @@ function New(props) {
         submit: {
             label: appContext.labels.newPostSubmitLabel
         }
-    }
+    };
 
     wapp.styles.use(style);
 

@@ -14,7 +14,7 @@ import AccountContext from "../context";
 function ChangePassword(props) {
 
     const accountContext = useContext(AccountContext);
-    const {user, name} = accountContext;
+    const {user, parentRoute, name} = accountContext;
 
     const appContext = useContext(AppContext);
     const context = useContext(WappContext);
@@ -24,7 +24,7 @@ function ChangePassword(props) {
     const {wapp} = context;
 
     async function onSubmit(e, formData) {
-        return await utils.sendRequest({requestName: name+"ChangePassword", args: formData, redirect: null });
+        return await utils.sendRequest({requestName: name+"ChangePassword", args: formData, redirect: {pathname: parentRoute, search:"", hash:""}, timeOut:1000 });
     }
 
     let formDataFromResolvers = {};
@@ -37,7 +37,7 @@ function ChangePassword(props) {
         submit: {
             label: appContext.labels.changePasswordSubmitLabel
         }
-    }
+    };
 
     if (user?._id){
         formData._id.value = user._id;

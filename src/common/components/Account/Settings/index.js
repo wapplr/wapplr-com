@@ -1,14 +1,11 @@
 import React, {useContext} from "react";
 
 import Button from "@material-ui/core/Button";
-import Typography from "@material-ui/core/Typography";
 
 import {WappContext, withWapp} from "wapplr-react/dist/common/Wapp";
 import getUtils from "wapplr-react/dist/common/Wapp/getUtils";
 
-import getUserName from "../../../utils/getUserName";
 import {withMaterialStyles} from "../../Template/withMaterial";
-import Avatar from "../../Avatar/me";
 import AppContext from "../../App/context";
 
 import materialStyle from "./materialStyle";

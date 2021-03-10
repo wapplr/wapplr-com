@@ -87,7 +87,7 @@ function Router(props) {
     const {user} = accountContext;
     const {page} = props;
 
-    const pageName = router({user, page})
+    const pageName = router({user, page});
     const Page = (pageName) ? pages[pageName] : null;
 
     return (Page) ? <Page /> : null;
@@ -123,7 +123,7 @@ function Account(props) {
             unsub();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user])
+    }, [user]);
 
     function getTitle() {
 
@@ -190,22 +190,40 @@ function Account(props) {
     function getStatus() {
 
         const isNotDeleted = user?._status_isNotDeleted;
+        const isBanned = user?._status_isBanned;
         const isValidated = user?._status_isValidated;
+        const isApproved = user?._status_isApproved;
+        const isFeatured = user?._status_isFeatured;
+        const isAuthor = ((user?._id && user?._id === user?._author) || (user?._id && user?._id === user?._author?._id));
+        const isAdmin = user?._status_isFeatured;
+        const isAuthorOrAdmin = !!(isAuthor || isAdmin);
 
-        return (!isNotDeleted) ?
-            appContext.titles.statusDeletedTitle :
-            (!isValidated) ?
-                appContext.titles.statusMissingDataTitle :
-                null
+        if (isAuthorOrAdmin && page !== "new"){
+
+            return (isBanned && isAdmin) ?
+                appContext.titles.statusBannedTitle :
+                (!isNotDeleted) ?
+                    appContext.titles.statusDeletedTitle :
+                    (!isValidated) ?
+                        appContext.titles.statusMissingDataTitle :
+                        (isFeatured && isAdmin) ?
+                            appContext.titles.statusFeaturedTitle :
+                            (isApproved && isAdmin) ?
+                                appContext.titles.statusApprovedTitle :
+                                (isAdmin) ? appContext.titles.statusCreatedTitle : null
+
+        }
+
+        return null;
     }
 
     const avatarClick = (e) => {
         wapp.client.history.push({pathname: appContext.routes.userRoute + "/" + user._id, search:"", hash:""})
-    }
+    };
 
     const backClick = (e) => {
         wapp.client.history.push({pathname: (pageName === "settings") ? appContext.routes.userRoute + "/" + user._id : appContext.routes.accountRoute, search:"", hash:""})
-    }
+    };
 
     return (
         <>
@@ -215,25 +233,27 @@ function Account(props) {
                         <Paper elevation={3}>
                             {
                                 (user?._id) ?
-                                    <div>
+                                    <div className={style.userLayout}>
                                         <div className={style.userBox}>
                                             <div className={style.avatar} onClick={avatarClick}>
                                                 <Avatar size={"big"}/>
                                             </div>
-                                            <div className={style.userName} onClick={avatarClick}>
-                                                <Typography variant="h5" >
-                                                    {userName}
-                                                </Typography>
-                                            </div>
-                                            {(getStatus()) ?
-                                                <div className={style.status}>
-                                                    <Typography variant={"subtitle1"} color={"textSecondary"} >
-                                                        {getStatus()}
+                                            <div className={style.userNameContainer}>
+                                                <div className={style.userName} onClick={avatarClick}>
+                                                    <Typography variant="h5" >
+                                                        {userName}
                                                     </Typography>
                                                 </div>
-                                                :
-                                                null
-                                            }
+                                                {(getStatus()) ?
+                                                    <div className={style.status}>
+                                                        <Typography variant={"subtitle1"} color={"textSecondary"} >
+                                                            {getStatus()}
+                                                        </Typography>
+                                                    </div>
+                                                    :
+                                                    null
+                                                }
+                                            </div>
                                         </div>
                                     </div>
                                     : null
@@ -241,37 +261,41 @@ function Account(props) {
                             <AppBar position={"relative"}
                                     className={materialStyle.appBar}
                             >
-                                <Toolbar>
-                                    <div className={style.titleContainer}>
-                                        <div className={style.title}>
-                                            <Typography variant="h6" className={materialStyle.title}>
-                                                {getTitle()}
-                                            </Typography>
+                                {(pageName !== "logout") ?
+                                    <Toolbar>
+                                        <div className={style.titleContainer}>
+                                            <div className={style.title}>
+                                                <Typography variant="h6" className={materialStyle.title}>
+                                                    {getTitle()}
+                                                </Typography>
+                                            </div>
                                         </div>
-                                    </div>
-                                    {(user?._id && pageName !== "settings") ?
-                                        <div>
-                                            <IconButton
-                                                color={"inherit"}
-                                                onClick={backClick}
-                                            >
-                                                <CancelIcon />
-                                            </IconButton>
-                                        </div>
-                                        :
-                                        null
-                                    }
-                                    {(pageName !== "settings") ?
-                                        <Menu
-                                            parentRoute={parentRoute}
-                                            menu={getMenu({appContext})}
-                                            materialStyle={materialStyle}
-                                            menuProperties={{user, page}}
-                                        />
-                                        :
-                                        null
-                                    }
-                                </Toolbar>
+                                        {(user?._id && pageName !== "settings") ?
+                                            <div>
+                                                <IconButton
+                                                    color={"inherit"}
+                                                    onClick={backClick}
+                                                >
+                                                    <CancelIcon />
+                                                </IconButton>
+                                            </div>
+                                            :
+                                            null
+                                        }
+                                        {(pageName !== "settings") ?
+                                            <Menu
+                                                parentRoute={parentRoute}
+                                                menu={getMenu({appContext})}
+                                                materialStyle={materialStyle}
+                                                menuProperties={{user, page}}
+                                            />
+                                            :
+                                            null
+                                        }
+                                    </Toolbar>
+                                    :
+                                    null
+                                }
                             </AppBar>
                             <AccountContext.Provider value={{user, parentRoute, name:"user", page}}>
                                 <div className={style.content}>

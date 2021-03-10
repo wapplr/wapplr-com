@@ -13,7 +13,7 @@ export function withMaterialTheme(options = {}, ComposedComponent) {
 
             const mediaQuery = this.getMediaQueries(options.mediaQuery);
 
-            this.theme = this.getTheme({theme: options.theme, mediaQuery})
+            this.theme = this.getTheme({theme: options.theme, mediaQuery});
 
             this.sheets = new ServerStyleSheets();
 
@@ -34,10 +34,10 @@ export function withMaterialTheme(options = {}, ComposedComponent) {
                     ...prevState,
                     [media]: e.matches
                 };
-                this.theme = this.getTheme({theme: options.theme, mediaQuery})
+                this.theme = this.getTheme({theme: options.theme, mediaQuery});
                 this.setState(mediaQuery);
             }
-        }
+        };
         getMediaQueries(queries) {
             const mediaQueryListener = this.mediaQueryListener;
             const mediaQuery = {};
@@ -50,7 +50,7 @@ export function withMaterialTheme(options = {}, ComposedComponent) {
                         shouldRemoveListenersForMedia[key]();
                         delete shouldRemoveListenersForMedia[key];
                     }
-                    mediaQueryList.addEventListener("change", mediaQueryListener)
+                    mediaQueryList.addEventListener("change", mediaQueryListener);
                     shouldRemoveListenersForMedia[key] = function removeMediaListener() {
                         mediaQueryList.removeEventListener("change", mediaQueryListener)
                     }
@@ -59,7 +59,7 @@ export function withMaterialTheme(options = {}, ComposedComponent) {
                 if (mediaQuery[key] && typeof mediaQuery[key].matches !== "undefined"){
                     mediaQuery[key] = mediaQuery[key].matches;
                 }
-            })
+            });
             this.shouldRemoveListenersForMedia = shouldRemoveListenersForMedia;
             return mediaQuery;
         }
@@ -75,7 +75,7 @@ export function withMaterialTheme(options = {}, ComposedComponent) {
                     options.theme(props) :
                     options.theme
             );
-        }
+        };
         createCssModule() {
             const sheets = this.sheets;
             return {
@@ -115,7 +115,7 @@ export function withMaterialTheme(options = {}, ComposedComponent) {
         }
     }
 
-    const displayName = ComposedComponent.displayName || ComposedComponent.name || "Component"
+    const displayName = ComposedComponent.displayName || ComposedComponent.name || "Component";
 
     WithMaterialTheme.displayName = `WithMaterialTheme(${displayName})`;
     WithMaterialTheme.contextType = WappContext;
@@ -134,7 +134,7 @@ export function withMaterialStyles(styles = {}, ComposedComponent) {
         }
     }
 
-    const displayName = ComposedComponent.displayName || ComposedComponent.name || "Component"
+    const displayName = ComposedComponent.displayName || ComposedComponent.name || "Component";
 
     WithMaterialStyles.displayName = `WithMaterialStyles(${displayName})`;
     WithMaterialStyles.contextType = WappContext;

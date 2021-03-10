@@ -38,7 +38,7 @@ function ResetPassword(props) {
         submit: {
             label: appContext.labels.resetPasswordSubmitLabel
         }
-    }
+    };
 
     const query = req.wappRequest.query;
 

@@ -34,7 +34,7 @@ function ChangeData(props) {
 
     const formData = {
         ...formDataFromResolvers,
-    }
+    };
 
     if (user?._id){
         formData._id.value = user._id;

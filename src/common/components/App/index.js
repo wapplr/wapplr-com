@@ -38,7 +38,7 @@ export default function App(props) {
         return function useUnsubscribe(){
             unsub();
         }
-    }, [url])
+    }, [url]);
 
     return (
         <AppContext.Provider value={{messages, labels, titles, routes, menus}}>

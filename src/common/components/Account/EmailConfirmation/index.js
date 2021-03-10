@@ -51,7 +51,7 @@ function EmailConfirmation(props) {
             submit: {
                 label: appContext.labels.emailConfirmationSubmitLabel
             }
-        }
+        };
 
         if (query.hash && formData.emailConfirmationKey){
             formData.emailConfirmationKey.value = query.hash;
@@ -81,7 +81,7 @@ function EmailConfirmation(props) {
             submit: {
                 label: appContext.labels.emailConfirmationSendAgainSubmitLabel
             }
-        }
+        };
 
         if (user?._id){
             formData._id.value = user._id;

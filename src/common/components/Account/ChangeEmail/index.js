@@ -37,7 +37,7 @@ function ChangeData(props) {
         submit: {
             label: appContext.labels.changeEmailSubmitLabel
         }
-    }
+    };
 
     if (user?._id){
         formData._id.value = user._id;

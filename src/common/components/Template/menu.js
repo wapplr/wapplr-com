@@ -3,7 +3,6 @@ import AddCircleIcon from "@material-ui/icons/AddCircle";
 import CodeIcon from "@material-ui/icons/Code";
 import GitHubIcon from "@material-ui/icons/GitHub";
 import ExitToAppIcon from "@material-ui/icons/ExitToApp";
-import PostAddIcon from "@material-ui/icons/PostAdd";
 
 function getMenu(props = {}) {
 

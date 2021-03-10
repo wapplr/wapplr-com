@@ -9,4 +9,4 @@ export default function getStatusManager(p = {}) {
 
 export const statusManagers = {
     post: getPostStatusManager
-}
+};

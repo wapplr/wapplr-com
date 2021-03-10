@@ -29,16 +29,16 @@ export default function setContents(p = {}) {
                 return getTitle({...p, title: titles.homeTitle})
             }
         }
-    })
+    });
 
     wapp.router.replace([
         {path: "/", contentName: "home"},
-    ])
+    ]);
 
     wapp.router.add([
         {path: "/installing", contentName: "home"},
         {path: "/api", contentName: "home"},
-    ])
+    ]);
 
     /*contents for user*/
 
@@ -50,17 +50,17 @@ export default function setContents(p = {}) {
                 return getTitle({...p, title: titles.accountTitle})
             }
         },
-    })
+    });
 
     wapp.router.add([
         {path: routes.accountRoute, contentName: "account"},
         {path: routes.accountRoute+"/:page", contentName: "account"},
         {path: routes.accountRoute+"/*", contentName: "account"},
-    ])
+    ]);
 
     /*contents for post*/
 
-    let reqUser = null;
+    let reqUserForPost = null;
 
     function getPostTitle(p) {
         const wappResponse = p.res.wappResponse;
@@ -94,27 +94,31 @@ export default function setContents(p = {}) {
             },
             request: async function ({wapp, req, res}) {
                 const wappResponse = res.wappResponse;
-                const args = wappResponse.route.params;
                 const state = wappResponse.store.getState();
                 const responses = state.res.responses || {};
-                if ((args._id && typeof responses.postFindById == "undefined") ||
-                    (args._id && responses.postFindById && responses.postFindById._id !== args._id) ||
-                    (args._id && reqUser?._id !== req.wappRequest.user?._id)) {
-                    reqUser = req.wappRequest.user;
-                    await wapp.requests.send({requestName: "postFindById", args: {_id: args._id}, req, res});
+                const route = wappResponse.route;
+                const {params} = route;
+                const {_id} = params;
+                if ((_id && !responses.postFindById) ||
+                    (_id && responses.postFindById && responses.postFindById._id !== _id) ||
+                    (_id && reqUserForPost?._id !== req.wappRequest.user?._id)) {
+                    reqUserForPost = {_id: req.wappRequest.user?._id};
+                    return await wapp.requests.send({requestName: "postFindById", args: {_id: _id}, req, res});
                 }
             }
         }
-    })
+    });
 
     wapp.router.add([
         {path: routes.postRoute, contentName: "post"},
         {path: routes.postRoute+"/new", contentName: "post"},
         {path: routes.postRoute+"/:_id", contentName: "post"},
         {path: routes.postRoute+"/:_id/:page", contentName: "post"},
-    ])
+    ]);
 
     /*contents for user*/
+
+    let reqUserForUser = null;
 
     function getUserTitle(p) {
         const wappResponse = p.res.wappResponse;
@@ -124,7 +128,22 @@ export default function setContents(p = {}) {
         const {params} = route;
         let title = titles.userTitle;
         if (post && params._id === post._id && post.name?.first){
-            title = (params.page === "edit") ? titles.editUserTitle + " | " + post.name.first : post.name.first
+            switch (params.page) {
+                case "edit":
+                    title = titles.editUserTitle + " | " + post.name.first;
+                    break;
+                case "posts":
+                    switch (params.pageType) {
+                        case "deleted":
+                            title = titles.userDeletedPostsTitle + " | " + post.name.first;
+                            break;
+                        default:
+                            title = titles.userPostsTitle + " | " + post.name.first
+                    }
+                    break;
+                default:
+                    title = post.name.first;
+            }
         }
         return getTitle({...p, title})
     }
@@ -148,23 +167,76 @@ export default function setContents(p = {}) {
             },
             request: async function ({wapp, req, res}) {
                 const wappResponse = res.wappResponse;
-                const args = wappResponse.route.params;
+                const wappRequest = req.wappRequest;
+                const user = wappRequest.user;
+                const isAdmin = user?._status_isFeatured;
                 const state = wappResponse.store.getState();
                 const responses = state.res.responses || {};
-                if ((args._id && typeof responses.userFindById == "undefined") ||
-                    (args._id && responses.userFindById && responses.userFindById._id !== args._id) ||
-                    (args._id && reqUser?._id !== req.wappRequest.user?._id)) {
-                    reqUser = req.wappRequest.user;
-                    await wapp.requests.send({requestName: "userFindById", args: {_id: args._id}, req, res});
+                const route = wappResponse.route;
+                const {params} = route;
+                const {_id, page, pageType} = params;
+
+                const authorStatus = (!isAdmin) ? {
+                    _author_status: {
+                        gt: 49
+                    }
+                } : {};
+
+                if (page === "posts" && !pageType && _id) {
+                    await wapp.requests.send({
+                        requestName: "postFindMany",
+                        args: {
+                            filter: {
+                                _author: _id,
+                                _operators:{
+                                    _status: {gt: 49},
+                                    ...authorStatus
+                                }
+                            },
+                            sort: "_CREATEDDATE_DESC",
+                            skip: 0,
+                            limit: 1000
+                        },
+                        req,
+                        res
+                    });
+                }
+
+                if (page === "posts" && pageType === "deleted" && _id) {
+                    await wapp.requests.send({
+                        requestName: "postFindMany",
+                        args: {
+                            filter: {
+                                _author: _id,
+                                _operators:{
+                                    _status: { lt: 50, gt:(isAdmin) ? 19 : 29 },
+                                    ...authorStatus
+                                }
+                            },
+                            sort: "_CREATEDDATE_DESC",
+                            skip: 0,
+                            limit: 1000
+                        },
+                        req,
+                        res
+                    });
+                }
+
+                if ((_id && !responses.userFindById) ||
+                    (_id && responses.userFindById && responses.userFindById._id !== _id) ||
+                    (_id && reqUserForUser?._id !== req.wappRequest.user?._id)) {
+                    reqUserForUser = {_id: req.wappRequest.user?._id};
+                    return await wapp.requests.send({requestName: "userFindById", args: {_id: _id}, req, res});
                 }
             }
         }
-    })
+    });
 
     wapp.router.add([
         {path: routes.userRoute, contentName: "user"},
         {path: routes.userRoute+"/:_id", contentName: "user"},
         {path: routes.userRoute+"/:_id/:page", contentName: "user"},
+        {path: routes.userRoute+"/:_id/:page/:pageType", contentName: "user"},
     ])
 
 }

@@ -17,11 +17,11 @@ const renderers = {
     code: ({language, value}) => {
         return <SyntaxHighlighter style={syntaxStyle} language={language} children={value} />
     }
-}
+};
 
 function Content(props) {
 
-    const container = useRef()
+    const container = useRef();
     const postContext = useContext(PostContext);
     // eslint-disable-next-line no-unused-vars
     const {user, post, name} = postContext;
@@ -43,7 +43,7 @@ function Content(props) {
                 aa[i].setAttribute("target", "_blank");
             }
         }
-    }, [container])
+    }, [container]);
 
     return (
         <div className={style.post} ref={container}>

@@ -38,7 +38,7 @@ function ForgotPassword(props) {
         submit: {
             label: appContext.labels.forgotPasswordSubmitLabel
         }
-    }
+    };
 
     if (user?._id){
         formData.email.value = user.email;

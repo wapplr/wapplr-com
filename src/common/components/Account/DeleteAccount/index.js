@@ -5,7 +5,6 @@ import getUtils from "wapplr-react/dist/common/Wapp/getUtils";
 
 import AppContext from "../../App/context";
 import {withMaterialStyles} from "../../Template/withMaterial";
-import Form from "../../Form";
 
 import materialStyle from "./materialStyle";
 import style from "./style.css";
@@ -36,7 +35,7 @@ function DeleteAccount(props) {
 
     const formData = {
         ...formDataFromResolvers,
-    }
+    };
 
     if (user?._id){
         formData._id.value = user._id;
@@ -51,7 +50,7 @@ function DeleteAccount(props) {
 
     const dialogEffect = function ({actions}) {
         dialog.actions = actions;
-    }
+    };
 
     const onDelete = function () {
         dialog.actions.open({
@@ -64,7 +63,7 @@ function DeleteAccount(props) {
             },
             successMessage: appContext.messages.deleteAccountSuccess
         })
-    }
+    };
 
     return (
         <div>

@@ -45,7 +45,7 @@ function NotFound(props) {
             unsub();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user])
+    }, [user]);
 
     function onClick(e, {action}) {
 
@@ -153,6 +153,6 @@ function NotFound(props) {
     )
 }
 
-const WappComponent = withWapp(NotFound)
+const WappComponent = withWapp(NotFound);
 
 export default withMaterialStyles(materialStyle, WappComponent);

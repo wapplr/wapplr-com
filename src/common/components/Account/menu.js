@@ -32,17 +32,6 @@ function getMenu(props = {}) {
             Icon: PersonAddIcon
         },
         {
-            name: menus.myProfileMenu,
-            href: function (p) {
-                return routes.userRoute + "/" + p?.user?._id;
-            },
-            role: function (p) {
-                return p?.user?._id && p?.user?._status_isNotDeleted;
-            },
-            Icon: AccountCircleIcon,
-            disableParentRoute: true
-        },
-        {
             name: menus.accountSettingsMenu,
             href: function (p) {
                 return routes.accountRoute

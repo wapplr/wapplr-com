@@ -14,18 +14,19 @@ const messages = {
     validationPostContent: "Minimum 1 max 20000 characters",
     notFoundNotAvailable: "This content is not available",
     notFoundLoginText: "Log in to your account because there are pages that can only be seen with permission",
-    deletePostSuccess: "The post has been deleted",
-    deletePostQuestion: "Are you sure want to delete this post?",
-    banPostSuccess: "The post has been banned",
-    banPostQuestion: "Are you sure want to ban this post?",
-    approvePostSuccess: "The post has been approved",
-    approvePostQuestion: "Are you sure want to approve this post?",
-    markFeaturedPostSuccess: "The post has been marked to featured",
-    markFeaturedPostQuestion: "Are you sure want to mark this post to featured?",
-    removeMarkFeaturedPostSuccess: "The featured mark of the post has been removed",
-    removeMarkFeaturedPostQuestion: "Are you sure want to remove featured mark of this post?",
+    deleteEntrySuccess: "This entry has been deleted",
+    deleteEntryQuestion: "Are you sure want to delete this entry?",
+    banEntrySuccess: "This entry has been banned",
+    banEntryQuestion: "Are you sure want to ban this entry?",
+    approveEntrySuccess: "This entry has been approved",
+    approveEntryQuestion: "Are you sure want to approve this entry?",
+    markFeaturedEntrySuccess: "This entry has been marked to featured",
+    markFeaturedEntryQuestion: "Are you sure want to mark this entry to featured?",
+    removeMarkFeaturedEntrySuccess: "The featured mark of this entry has been removed",
+    removeMarkFeaturedEntryQuestion: "Are you sure want to remove featured mark of this entry?",
     deleteAccountQuestion: "Are you sure want to delete your account?",
-    deleteAccountSuccess: "Your account has beed deleted"
+    deleteAccountSuccess: "Your account has been deleted",
+    thereAreNoEntries:"There are no entries"
 };
 
 export default messages;

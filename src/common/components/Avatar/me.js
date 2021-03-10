@@ -22,7 +22,7 @@ function Me(props) {
         return function useUnsubscribe(){
             unsub();
         }
-    }, [user])
+    }, [user]);
 
     return (
         <Avatar {...rest} user={user} />

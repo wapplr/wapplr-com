@@ -7,6 +7,15 @@
     min-height: inherit;
 }
 
+.userLayout {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 32px;
+    background-color: #0000001a;
+}
+
 .userBox{
     padding: 8px;
     margin-bottom: 32px;
@@ -24,7 +33,8 @@
     cursor: pointer;
 }
 
-.userName{
+.userNameContainer{
+    text-align: center;
     margin-left: auto;
     margin-right: auto;
     width: auto;
@@ -32,6 +42,8 @@
     padding: 8px;
     cursor: pointer;
 }
+
+.userName{}
 
 .status {
     display: flex;
@@ -45,6 +57,12 @@
 
 .titleContainer {
     width: 100%;
-    overflow: hidden
+    overflow: hidden;
 }
 .title {}
+
+@media (max-width:599px) {
+    .content{
+        padding: 16px;
+    }
+}

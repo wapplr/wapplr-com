@@ -3,10 +3,13 @@ import wapplrPwa from "wapplr-pwa";
 import wapplrReact from "wapplr-react";
 import wapplrGraphql from "wapplr-graphql";
 import wapplrAuthentication from "wapplr-authentication";
+import wapplrPostTypes from "wapplr-posttypes";
 
 import setContents from "../common/setContents";
 
 import {getConfig as getCommonConfig} from "../common/config";
+import getPostStatusManager from "../common/config/statuses/post";
+import getUserStatusManager from "../common/config/statuses/user";
 
 export function getConfig(p = {}) {
 
@@ -15,12 +18,12 @@ export function getConfig(p = {}) {
     const clientConfig = config.client || {};
     const commonConfig = getCommonConfig(p).config;
 
-    const common = {...commonConfig.common}
+    const common = {...commonConfig.common};
 
     const client = {
         ...clientConfig,
         disableUseDefaultMiddlewares: true
-    }
+    };
 
     return {
         config: {
@@ -38,6 +41,7 @@ export default async function createClient(p) {
 
     await wapplrPwa({wapp});
 
+    wapplrPostTypes({wapp});
     wapplrAuthentication({wapp});
     wapplrGraphql({wapp});
     wapplrReact({wapp});
@@ -45,11 +49,17 @@ export default async function createClient(p) {
 
     const authSettings = {
         name: "user",
-        addIfThereIsNot: true
+        addIfThereIsNot: true,
+        statusManager: getUserStatusManager(),
     };
 
     wapp.client.authentications.getAuthentication(authSettings);
-    //wapp.client.authentications.getAuthentication({...authSettings, name:"author"});
+
+    wapp.client.postTypes.getPostType({
+        name: "post",
+        addIfThereIsNot: true,
+        statusManager: getPostStatusManager(),
+    });
 
     return wapp;
 }
@@ -75,7 +85,7 @@ const defaultConfig = {
             ROOT: (typeof ROOT !== "undefined") ? ROOT : "/"
         }
     }
-}
+};
 
 export async function run(p = defaultConfig) {
 

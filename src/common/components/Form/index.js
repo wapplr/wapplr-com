@@ -35,7 +35,7 @@ const components = {
         },
         Component: TextField
     }
-}
+};
 
 function getComponentName({data, key}) {
     if (data.componentName){
@@ -77,7 +77,7 @@ function generatePropsAndSelectComponent({formData, key, onSubmit, onChange}) {
     const props = Object.keys(defaultProps).reduce(function (a, key, i) {
         a[key] = (typeof data[key] !== "undefined") ? data[key] : defaultProps[key];
         return a;
-    }, {})
+    }, {});
 
     if (props.type === "submit") {
         props.onClick = onSubmit;
@@ -226,7 +226,7 @@ class Form extends React.Component {
                 parent[lastKey] = (data.value) ? data.value : (data.required) ? props.formData[key].default : null;
             }
             return a;
-        }, {})
+        }, {});
 
         const response = await onSubmit(e, sendData);
 

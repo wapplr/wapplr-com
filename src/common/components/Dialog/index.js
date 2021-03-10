@@ -28,11 +28,11 @@ function Dialog(props) {
         submitText = "Submit",
         dialogTitle = "Alert",
         dialogContent = "Are you sure?"
-    } = props
+    } = props;
 
     const [open, setOpen] = useState(false);
     const [snackMessage, setSnackMessage] = useState("");
-    const [dialogProps, setDialogProps] = useState({cancelText, submitText, dialogTitle, dialogContent})
+    const [dialogProps, setDialogProps] = useState({cancelText, submitText, dialogTitle, dialogContent});
 
     const handleOpen = (dialogProps) => {
         if (dialogProps){
@@ -90,7 +90,7 @@ function Dialog(props) {
         if (snackMessage) {
             setSnackMessage("")
         }
-    }
+    };
 
     useEffect(function () {
 
@@ -98,14 +98,14 @@ function Dialog(props) {
             open: handleOpen,
             cancel: handleCancel,
             submit: handleSubmit,
-        }
+        };
 
         if (props.effect) {
             props.effect({
                 actions
             })
         }
-    })
+    });
 
     const Form = dialogProps.Form;
 
@@ -113,7 +113,7 @@ function Dialog(props) {
 
     const formSubmit = async function (e, formData) {
         return await handleSubmit(e, formData);
-    }
+    };
 
     return (
         <>

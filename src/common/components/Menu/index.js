@@ -70,7 +70,7 @@ function Menu(props) {
 
     const actions = {
         close: handleMenuClose
-    }
+    };
 
     useEffect(function () {
         if (effect){
@@ -78,7 +78,7 @@ function Menu(props) {
                 actions
             })
         }
-    })
+    });
 
     const featuredMenus = [...menu.filter(function (menu, key) {return !!(menu.featured && !list)})];
     const showFeaturedMenu = [...featuredMenus.filter(function (menu, key) {return (menu.role) ? menu.role(menuProperties) : true})];
@@ -93,7 +93,7 @@ function Menu(props) {
         keepMounted: true,
         open:Boolean(anchorEl),
         onClose:handleMenuClose
-    }
+    };
 
     return (
         <>  {
@@ -146,6 +146,7 @@ function Menu(props) {
                         >
                             {[...moreMenus.map(function (menu, key) {
 
+                                const name = (typeof menu.name == "function") ? menu.name(menuProperties) : menu.name;
                                 const target = menu.target || "self";
                                 const href = (typeof menu.href == "function") ? menu.href(menuProperties) : menu.href;
                                 const Icon = menu.Icon;
@@ -171,7 +172,7 @@ function Menu(props) {
                                                     <Icon/>
                                                 </ListItemIcon> : null
                                             }
-                                            <ListItemText primary={menu.name}/>
+                                            <ListItemText primary={name}/>
                                         </ItemComponent>
                                     )
 

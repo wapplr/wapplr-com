@@ -3,7 +3,7 @@ export function getConfig(p = {}) {
     const {config = {}} = p;
 
     const commonConfig = config.common || {};
-    const globalsConfig = config.globals || {}
+    const globalsConfig = config.globals || {};
 
     const {WAPP, DEV} = globalsConfig;
 
@@ -14,7 +14,7 @@ export function getConfig(p = {}) {
         graphql: {
             route: (DEV) ? "/graphql" : "/g" + WAPP
         }
-    }
+    };
 
     return {
         config: {

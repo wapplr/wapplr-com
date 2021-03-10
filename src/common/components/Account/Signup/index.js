@@ -40,7 +40,7 @@ function Signup(props) {
 
     const formData = {
         ...formDataFromResolvers,
-    }
+    };
 
     wapp.styles.use(style);
 

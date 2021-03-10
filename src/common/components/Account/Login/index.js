@@ -38,7 +38,7 @@ function Login(props) {
 
     const formData = {
         ...formDataFromResolvers,
-    }
+    };
 
     wapp.styles.use(style);
 

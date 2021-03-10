@@ -19,6 +19,6 @@ export const materialTheme = function (p = {}) {
             type: dark ? "dark" : "light",
         },
     }
-}
+};
 
-export const materialMediaQuery = ["(prefers-color-scheme: dark)"]
+export const materialMediaQuery = ["(prefers-color-scheme: dark)"];

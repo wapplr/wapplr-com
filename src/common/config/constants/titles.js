@@ -16,20 +16,26 @@ const titles = {
     editPostTitle: "Edit post",
     statusBannedTitle: "Banned",
     statusDeletedTitle: "Deleted",
+    statusAuthorDeletedTitle: "Author deleted",
     statusMissingDataTitle: "Missing data",
     statusApprovedTitle: "Approved",
     statusFeaturedTitle: "Featured",
     statusCreatedTitle: "Created",
-    dialogDeletePostTitle: "Delete post",
-    dialogBanPostTitle: "Ban post",
-    dialogApprovePostTitle: "Approve post",
-    dialogMarkFeaturedPostTitle: "Mark post to featured",
-    dialogRemoveMarkFeaturedPostTitle: "Remove featured mark of post",
+    dialogDeleteEntryTitle: "Delete post",
+    dialogBanEntryTitle: "Ban post",
+    dialogApproveEntryTitle: "Approve post",
+    dialogMarkFeaturedEntryTitle: "Mark post to featured",
+    dialogRemoveMarkFeaturedEntryTitle: "Remove featured mark of post",
     dialogDeleteAccountTitle: "Delete account",
 
     userTitle: "User",
+    userProfileTitle: "User profile",
     editUserTitle: "Edit user",
     dashboardTitle: "Dashboard",
+    userPostsTitle: "User posts",
+    userDeletedPostsTitle: "Deleted posts",
+    myPostsTitle: "My posts",
+    myDeletedPostsTitle: "My deleted posts"
 };
 
 export default titles;
