@@ -3,7 +3,7 @@ import React, {useContext} from "react";
 import {WappContext, withWapp} from "wapplr-react/dist/common/Wapp";
 import getUtils from "wapplr-react/dist/common/Wapp/getUtils";
 
-import {withMaterialStyles} from "../../Template/withMaterial";
+import {withMaterialStyles} from "../../Template/withMaterial"; 
 import PostContext from "../../Post/context";
 import Menu from "../../Menu";
 import getMenu from "./menu";

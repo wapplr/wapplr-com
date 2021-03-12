@@ -1,6 +1,7 @@
 import App from "./components/App";
 import titles from "./config/constants/titles";
 import routes from "./config/constants/routes";
+import {runPostTypesConfigSync} from "./postTypes";
 
 export default function setContents(p = {}) {
 
@@ -21,7 +22,15 @@ export default function setContents(p = {}) {
 
     /*contents for home and some static page*/
 
-    wapp.contents.add({
+    const redirectToReadmeMd = {
+        contentName: "document",
+        action: async function action(p) {
+            const {req, res} = p;
+            return await wapp.router.routeManager.resolve({path: "/document/604ba75865f8fe2c0c5818a4", req, res});
+        }
+    };
+
+    /*wapp.contents.add({
         home: {
             render: App,
             renderType: "react",
@@ -29,25 +38,54 @@ export default function setContents(p = {}) {
                 return getTitle({...p, title: titles.homeTitle})
             }
         }
-    });
+    });*/
 
     wapp.router.replace([
-        {path: "/", contentName: "home"},
+        {path: "/", ...redirectToReadmeMd},
     ]);
 
-    wapp.router.add([
-        {path: "/installing", contentName: "home"},
-        {path: "/api", contentName: "home"},
-    ]);
+    /*contents for post types, post, document, user...*/
 
-    /*contents for user*/
+    runPostTypesConfigSync({action:"setContents", p:{wapp, routes, titles, getTitle}});
+
+    /*contents for user account*/
 
     wapp.contents.add({
         account: {
             render: App,
             renderType: "react",
             title: function (p) {
-                return getTitle({...p, title: titles.accountTitle})
+
+                const wappResponse = p.res.wappResponse;
+                const route = wappResponse.route;
+                const {params} = route;
+
+                let title;
+
+                switch (params.page) {
+                    case "changedata":
+                        title = titles.changeDataTitle;
+                        break;
+                    case "changeemail":
+                        title = titles.changeEmailTitle;
+                        break;
+                    case "changepassword":
+                        title = titles.changePasswordTitle;
+                        break;
+                    case "forgotpassword":
+                        title = titles.forgotPasswordTitle;
+                        break;
+                    case "deleteaccount":
+                        title = titles.deleteAccountTitle;
+                        break;
+                    case "logout":
+                        title = titles.logoutTitle;
+                        break;
+                    default:
+                        title = titles.accountTitle
+                }
+
+                return getTitle({...p, title})
             }
         },
     });
@@ -57,186 +95,5 @@ export default function setContents(p = {}) {
         {path: routes.accountRoute+"/:page", contentName: "account"},
         {path: routes.accountRoute+"/*", contentName: "account"},
     ]);
-
-    /*contents for post*/
-
-    let reqUserForPost = null;
-
-    function getPostTitle(p) {
-        const wappResponse = p.res.wappResponse;
-        const state = wappResponse.store.getState();
-        const post = state.res.responses?.postFindById;
-        const route = wappResponse.route;
-        const {path, params} = route;
-        let title = (path === routes.postRoute+"/new") ? titles.newPostTitle : titles.postTitle;
-        if (post && params._id === post._id && post.title){
-            title = (params.page === "edit") ? titles.editPostTitle + " | " + post.title : post.title;
-        }
-        return getTitle({...p, title})
-    }
-
-    wapp.contents.add({
-        post: {
-            render: App,
-            renderType: "react",
-            title: getPostTitle,
-            description: function (p) {
-                const {wapp, req, res} = p;
-                const wappResponse = res.wappResponse;
-                const state = wappResponse.store.getState();
-                const post = state.res.responses?.postFindById;
-                if (post?._id && post?.content_extract){
-                    return post.content_extract;
-                }
-                const config = wapp.getTargetObject().config;
-                const {description} = config;
-                return (description) ? description : getPostTitle({wapp, req, res}).split(" | ")[0];
-            },
-            request: async function ({wapp, req, res}) {
-                const wappResponse = res.wappResponse;
-                const state = wappResponse.store.getState();
-                const responses = state.res.responses || {};
-                const route = wappResponse.route;
-                const {params} = route;
-                const {_id} = params;
-                if ((_id && !responses.postFindById) ||
-                    (_id && responses.postFindById && responses.postFindById._id !== _id) ||
-                    (_id && reqUserForPost?._id !== req.wappRequest.user?._id)) {
-                    reqUserForPost = {_id: req.wappRequest.user?._id};
-                    return await wapp.requests.send({requestName: "postFindById", args: {_id: _id}, req, res});
-                }
-            }
-        }
-    });
-
-    wapp.router.add([
-        {path: routes.postRoute, contentName: "post"},
-        {path: routes.postRoute+"/new", contentName: "post"},
-        {path: routes.postRoute+"/:_id", contentName: "post"},
-        {path: routes.postRoute+"/:_id/:page", contentName: "post"},
-    ]);
-
-    /*contents for user*/
-
-    let reqUserForUser = null;
-
-    function getUserTitle(p) {
-        const wappResponse = p.res.wappResponse;
-        const state = wappResponse.store.getState();
-        const post = state.res.responses?.userFindById;
-        const route = wappResponse.route;
-        const {params} = route;
-        let title = titles.userTitle;
-        if (post && params._id === post._id && post.name?.first){
-            switch (params.page) {
-                case "edit":
-                    title = titles.editUserTitle + " | " + post.name.first;
-                    break;
-                case "posts":
-                    switch (params.pageType) {
-                        case "deleted":
-                            title = titles.userDeletedPostsTitle + " | " + post.name.first;
-                            break;
-                        default:
-                            title = titles.userPostsTitle + " | " + post.name.first
-                    }
-                    break;
-                default:
-                    title = post.name.first;
-            }
-        }
-        return getTitle({...p, title})
-    }
-
-    wapp.contents.add({
-        user: {
-            render: App,
-            renderType: "react",
-            title: getUserTitle,
-            description: function (p) {
-                const {wapp, req, res} = p;
-                const wappResponse = res.wappResponse;
-                const state = wappResponse.store.getState();
-                const post = state.res.responses?.userFindById;
-                if (post?._id && post?.name){
-                    return post?.name.first+"'s page";
-                }
-                const config = wapp.getTargetObject().config;
-                const {description} = config;
-                return (description) ? description : getUserTitle({wapp, req, res}).split(" | ")[0];
-            },
-            request: async function ({wapp, req, res}) {
-                const wappResponse = res.wappResponse;
-                const wappRequest = req.wappRequest;
-                const user = wappRequest.user;
-                const isAdmin = user?._status_isFeatured;
-                const state = wappResponse.store.getState();
-                const responses = state.res.responses || {};
-                const route = wappResponse.route;
-                const {params} = route;
-                const {_id, page, pageType} = params;
-
-                const authorStatus = (!isAdmin) ? {
-                    _author_status: {
-                        gt: 49
-                    }
-                } : {};
-
-                if (page === "posts" && !pageType && _id) {
-                    await wapp.requests.send({
-                        requestName: "postFindMany",
-                        args: {
-                            filter: {
-                                _author: _id,
-                                _operators:{
-                                    _status: {gt: 49},
-                                    ...authorStatus
-                                }
-                            },
-                            sort: "_CREATEDDATE_DESC",
-                            skip: 0,
-                            limit: 1000
-                        },
-                        req,
-                        res
-                    });
-                }
-
-                if (page === "posts" && pageType === "deleted" && _id) {
-                    await wapp.requests.send({
-                        requestName: "postFindMany",
-                        args: {
-                            filter: {
-                                _author: _id,
-                                _operators:{
-                                    _status: { lt: 50, gt:(isAdmin) ? 19 : 29 },
-                                    ...authorStatus
-                                }
-                            },
-                            sort: "_CREATEDDATE_DESC",
-                            skip: 0,
-                            limit: 1000
-                        },
-                        req,
-                        res
-                    });
-                }
-
-                if ((_id && !responses.userFindById) ||
-                    (_id && responses.userFindById && responses.userFindById._id !== _id) ||
-                    (_id && reqUserForUser?._id !== req.wappRequest.user?._id)) {
-                    reqUserForUser = {_id: req.wappRequest.user?._id};
-                    return await wapp.requests.send({requestName: "userFindById", args: {_id: _id}, req, res});
-                }
-            }
-        }
-    });
-
-    wapp.router.add([
-        {path: routes.userRoute, contentName: "user"},
-        {path: routes.userRoute+"/:_id", contentName: "user"},
-        {path: routes.userRoute+"/:_id/:page", contentName: "user"},
-        {path: routes.userRoute+"/:_id/:page/:pageType", contentName: "user"},
-    ])
 
 }

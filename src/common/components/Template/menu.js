@@ -1,6 +1,4 @@
 import HomeIcon from "@material-ui/icons/Home";
-import AddCircleIcon from "@material-ui/icons/AddCircle";
-import CodeIcon from "@material-ui/icons/Code";
 import GitHubIcon from "@material-ui/icons/GitHub";
 import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 
@@ -11,19 +9,9 @@ function getMenu(props = {}) {
 
     return [
         {
-            name: menus.homeMenu,
+            name: menus.gettingStartedMenu,
             href: "/",
             Icon: HomeIcon
-        },
-        {
-            name: menus.gettingStartedMenu,
-            href: "/installing",
-            Icon: AddCircleIcon
-        },
-        {
-            name: menus.apiReferenceMenu,
-            href: "/api",
-            Icon: CodeIcon
         },
         {
             name: "GitHub",

@@ -1,3 +1,5 @@
+import {runPostTypesConfigSync} from "../../postTypes";
+
 const menus = {
     loginMenu: "Login",
     signupMenu: "Signup",
@@ -12,7 +14,6 @@ const menus = {
     gettingStartedMenu: "Getting started",
     apiReferenceMenu: "Api reference",
     gitHubMenu: "GitHub",
-    newPostMenu: "New post",
     editMenu: "Edit",
     deleteMenu: "Delete",
     banMenu: "Ban",
@@ -20,11 +21,10 @@ const menus = {
     featuredMenu: "Mark featured",
     removeFeaturedMenu: "Remove featured",
     accountSettingsMenu: "Account settings",
-    userPostsMenu: "User posts",
-    myPostsMenu: "My posts",
     dashboardMenu: "Dashboard",
     userProfileMenu: "User profile",
     deletedPostsMenu: "Deleted posts",
+    ...runPostTypesConfigSync({action:"getConstants", rKey:"menus"}).reduce((a, v) => {return {...a, ...v}}, {})
 };
 
 export default menus;

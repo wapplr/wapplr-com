@@ -39,7 +39,7 @@ function New(props) {
     const formData = {
         ...formDataFromResolvers,
         submit: {
-            label: appContext.labels.newPostSubmitLabel
+            label: appContext.labels.newEntrySubmitLabel
         }
     };
 
@@ -50,7 +50,7 @@ function New(props) {
             formData={formData}
             onSubmit={onSubmit}
             successMessage={
-                appContext.messages.newPostSuccessMessage
+                appContext.messages.newEntrySuccessMessage
             }
         />
     )

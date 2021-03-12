@@ -3,38 +3,39 @@ import React, {useContext, useState, useEffect} from "react";
 import {WappContext, withWapp} from "wapplr-react/dist/common/Wapp";
 import getUtils from "wapplr-react/dist/common/Wapp/getUtils";
 
-import {withMaterialStyles} from "../../Template/withMaterial";
-import PostContext from "../../Post/context";
-import AppContext from "../../App/context";
-
-import materialStyle from "./materialStyle";
-import style from "./style.css";
 import Typography from "@material-ui/core/Typography";
-
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemAvatar from "@material-ui/core/ListItemAvatar";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import ListItemText from "@material-ui/core/ListItemText";
+
+import getStatus from "../../../utils/getStatus";
+
+import {withMaterialStyles} from "../../Template/withMaterial";
+import PostContext from "../../Post/context";
+import AppContext from "../../App/context";
+
 import Avatar from "../../Avatar";
 import Dialog from "../../Dialog";
 import getDefaultMenu, {getMenuProps} from "../../Post/menu";
-import getStatus from "../../Post/status";
 import Menu from "../../Menu";
+
+import materialStyle from "./materialStyle";
+import style from "./style.css";
 
 function Posts(props) {
 
     const postContext = useContext(PostContext);
     // eslint-disable-next-line no-unused-vars
-    const {user, post, parentRoute} = postContext;
-    const name = "post";
+    const {user, post, parentRoute, statusManager} = postContext;
 
     const context = useContext(WappContext);
     const appContext = useContext(AppContext);
     // eslint-disable-next-line no-unused-vars
     const utils = getUtils(context);
     // eslint-disable-next-line no-unused-vars
-    const {subscribe, materialStyle} = props;
+    const {subscribe, materialStyle, name = "post"} = props;
 
     const {wapp, req} = context;
 
@@ -70,7 +71,7 @@ function Posts(props) {
         wapp.client.history.push({
             search:"",
             hash:"",
-            ...wapp.client.history.parsePath(appContext.routes.postRoute+"/"+post._id)
+            ...wapp.client.history.parsePath(appContext.routes[name+"Route"]+"/"+post._id)
         });
 
         e.preventDefault();
@@ -94,10 +95,11 @@ function Posts(props) {
                             const wappRequest = req.wappRequest;
                             const {path} = wappRequest;
 
-                            const status = getStatus({user, post, page:"", appContext});
+                            const status = getStatus({user, post, appContext, statusManager});
                             const menuActions = {};
 
                             const menu = getDefaultMenu({
+                                statusManager,
                                 ...getMenuProps({
                                     appContext,
                                     menuActions,

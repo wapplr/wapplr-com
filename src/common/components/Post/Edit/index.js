@@ -15,7 +15,7 @@ function Edit(props) {
 
     const postContext = useContext(PostContext);
     // eslint-disable-next-line no-unused-vars
-    const {name, user, post, parentRoute} = postContext;
+    const {name, user, post, parentRoute, statusManager} = postContext;
 
     const appContext = useContext(AppContext);
     const context = useContext(WappContext);
@@ -38,12 +38,12 @@ function Edit(props) {
         console.log(e)
     }
 
-    const isNotDeleted = post?._status_isNotDeleted;
+    const isNotDeleted = post && post[statusManager._status_isNotDeleted];
 
     const formData = {
         ...formDataFromResolvers,
         submit: {
-            label: (isNotDeleted) ? appContext.labels.savePostSubmitLabel : appContext.labels.restorePostSubmitLabel
+            label: (isNotDeleted) ? appContext.labels.saveEntrySubmitLabel : appContext.labels.restoreEntrySubmitLabel
         }
     };
 

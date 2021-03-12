@@ -9,9 +9,12 @@ import Typography from "@material-ui/core/Typography";
 import AppBar from "@material-ui/core/AppBar";
 import Paper from "@material-ui/core/Paper";
 
-import AppContext from "../App/context";
+import getStatus from "../../utils/getStatus";
+import capitalize from "../../utils/capitalize";
 
 import {withMaterialStyles} from "../Template/withMaterial";
+import AppContext from "../App/context";
+
 import Dialog from "../Dialog";
 import Menu from "../Menu";
 import NotFound from "../NotFound";
@@ -22,8 +25,9 @@ import materialStyle from "./materialStyle";
 
 import PostContext from "./context";
 import getDefaultMenu, {getMenuProps} from "./menu";
-import getStatus from "./status";
+import {defaultGetPageName} from "./utils";
 
+import Router from "./Router";
 import New from "./New";
 import Edit from "./Edit";
 import Content from "./Content";
@@ -34,91 +38,17 @@ const defaultPages = {
     edit: Edit,
 };
 
-export function showPageOrNotFound({user, post, page}) {
-
-    const isAdmin = user?._status_isFeatured;
-    const isAuthor = ((user?._id && user?._id === post?._author) || (user?._id && user?._id === post?._author?._id));
-    const isAdminOrAuthor = (isAdmin || isAuthor);
-    const isNotDeleted = post?._status_isNotDeleted;
-    const isBanned = post?._status_isBanned;
-    const postId = post?._id;
-    const authorIsNotDeleted = post?._author_status_isNotDeleted;
-
-    if (isBanned && !isAdmin){
-        return false;
-    }
-
-    if (!authorIsNotDeleted && !isAdmin && page !== "new"){
-        return false;
-    }
-
-    return !!((isNotDeleted && postId) || (!isNotDeleted && isAdminOrAuthor && postId) || (user?._id && user?._status_isNotDeleted && page === "new"));
-
-}
-
-export function defaultRouter({user, post, page}) {
-
-    const show = showPageOrNotFound({user, post, page});
-
-    if (!show) {
-        return null;
-    }
-
-    const isAdmin = user?._status_isFeatured;
-    const isAuthor = ((user?._id && user?._id === post?._author) || (user?._id && user?._id === post?._author?._id));
-    const isAdminOrAuthor = (isAdmin || isAuthor);
-    const isFeatured = post?._status_isFeatured;
-    const postId = post?._id;
-
-    function renderWithUser() {
-        switch (page) {
-            case "new":
-                return "new";
-            case "edit":
-                return (isAdminOrAuthor && postId && !isFeatured) ? "edit" : null;
-            default:
-                return (postId) ? "content" : null;
-        }
-    }
-
-    function renderWithoutUser() {
-        switch (page) {
-            case "new":
-                return null;
-            case "edit":
-                return null;
-            default:
-                return "content";
-        }
-    }
-
-    return (!user) ? renderWithoutUser() : renderWithUser();
-
-}
-
-function Router(props) {
-
-    const postContext = useContext(PostContext);
-    const {user, post} = postContext;
-    const {page, pages, router} = props;
-
-    const pageName = router({user, post, page});
-    const Page = (pageName) ? pages[pageName] : null;
-
-    return (Page) ? <Page /> : null;
-}
-
-const capitalize = (s) => {
-    return s.charAt(0).toUpperCase() + s.slice(1)
-};
-
 function Post(props) {
 
     const appContext = useContext(AppContext);
     const context = useContext(WappContext);
 
+    const {userStatusManager, routes, titles} = appContext;
+
+    const {subscribe, materialStyle, ...rest} = props;
+
     const {
-        parentRoute = appContext.routes.postRoute,
+        parentRoute = routes.postRoute,
         name = "post",
         getTitle = function ({post}) {return post?.title},
         getSubtitle = function ({post}) {return post?.subtitle},
@@ -126,21 +56,20 @@ function Post(props) {
         menuProperties,
         pages = defaultPages,
         layoutType,
-        topMenu,
+        getTopMenu,
         maxWidth = "lg",
-        router = defaultRouter,
-        dashboardTitle = function ({post}) {return appContext.titles.dashboardTitle}
-    } = props;
+        getPageName = defaultGetPageName,
+        getDashboardTitle = function ({post}) {return titles.dashboardTitle}
+    } = rest;
 
     const utils = getUtils(context);
-    const {subscribe, materialStyle} = props;
+    const {wapp, res} = context;
 
-    // eslint-disable-next-line no-unused-vars
-    const {wapp, req, res} = context;
+    const statusManager = wapp.getTargetObject().postTypes.findPostType({name: name}).statusManager;
 
     wapp.styles.use(style);
 
-    const page = (res.wappResponse.route.path === appContext.routes[name+"Route"]+"/new") ? "new" : res.wappResponse.route.params.page;
+    const page = (res.wappResponse.route.path === routes[name+"Route"]+"/new") ? "new" : res.wappResponse.route.params.page;
 
     const [user, setUser] = useState(utils.getRequestUser());
     const [post, setPost] = useState((page === "new") ? null : utils.getGlobalState().res.responses && utils.getGlobalState().res.responses[name+"FindById"]);
@@ -191,21 +120,21 @@ function Post(props) {
 
     function getTitleWithPageName() {
 
-        const pageName = router({user, post, page});
+        const pageName = getPageName({user, post, page, statusManager, userStatusManager});
 
         if (pageName === "new") {
-            return appContext.titles["new"+capitalize(name)+"Title"];
+            return titles["new"+capitalize(name)+"Title"];
         }
 
         if (pageName === "edit") {
-            return appContext.titles["edit"+capitalize(name)+"Title"];
+            return titles["edit"+capitalize(name)+"Title"];
         }
 
         if (pageName === "content") {
-            return getTitle({user, post, page}) || appContext.titles[name+"Title"];
+            return getTitle({user, post, page}) || titles[name+"Title"];
         }
 
-        return getTitle({user, post, page}) || appContext.titles[name+"Title"] || "";
+        return getTitle({user, post, page}) || titles[name+"Title"] || "";
 
     }
 
@@ -223,9 +152,11 @@ function Post(props) {
 
     const menuProps = getMenuProps({appContext, menuActions, dialog, utils, name, post, parentRoute});
 
-    const menu = (getMenu) ? getMenu(menuProps) : getDefaultMenu(menuProps);
+    const menu = (getMenu) ? getMenu({...menuProps, statusManager}) : getDefaultMenu({...menuProps, statusManager});
 
-    const pageName = router({user, post, page});
+    const topMenu = (getTopMenu) ? getTopMenu({...menuProps, statusManager}) : [];
+
+    const pageName = getPageName({user, post, page, statusManager, userStatusManager});
 
     if (!pageName){
         res.wappResponse.status(404)
@@ -233,7 +164,7 @@ function Post(props) {
 
     const avatarClick = (e) => {
         const author = getAuthorObject();
-        wapp.client.history.push({pathname: appContext.routes.userRoute + "/" + author._id, search:"", hash:""})
+        wapp.client.history.push({pathname: routes.userRoute + "/" + author._id, search:"", hash:""})
     };
 
     function getAuthorObject() {
@@ -250,7 +181,7 @@ function Post(props) {
                                 {(layoutType === "user") ?
                                     <div className={style.userLayout}>
                                         {
-                                            (topMenu?.length) ?
+                                            (topMenu.length) ?
                                                 <div className={style.topMenu}>
                                                     <Menu
                                                         parentRoute={parentRoute}
@@ -281,10 +212,10 @@ function Post(props) {
                                                     :
                                                     null
                                                 }
-                                                {(getStatus({user, post, page, appContext})) ?
+                                                {(page !== "new" && getStatus({user, post, appContext, statusManager})) ?
                                                     <div className={style.status}>
                                                         <Typography variant={"subtitle1"} color={"textSecondary"} className={materialStyle.subtitle}>
-                                                            {getStatus({user, post, page, appContext})}
+                                                            {getStatus({user, post, appContext, statusManager})}
                                                         </Typography>
                                                     </div>
                                                     :
@@ -323,10 +254,10 @@ function Post(props) {
                                                             :
                                                             null
                                                         }
-                                                        {(getStatus({user, post, page, appContext})) ?
+                                                        {(page !== "new" && getStatus({user, post, page, appContext, statusManager})) ?
                                                             <div className={style.status}>
                                                                 <Typography variant={"subtitle1"} color={"textSecondary"} className={materialStyle.subtitle}>
-                                                                    {getStatus({user, post, page, appContext})}
+                                                                    {getStatus({user, post, page, appContext, statusManager})}
                                                                 </Typography>
                                                             </div>
                                                             :
@@ -337,7 +268,7 @@ function Post(props) {
                                                 :
                                                 <div className={style.titleContainer} >
                                                     <Typography variant={"h6"} className={materialStyle.title}>
-                                                        {dashboardTitle({user, post, page})}
+                                                        {getDashboardTitle({user, post, page})}
                                                     </Typography>
                                                 </div>
                                         }
@@ -352,9 +283,9 @@ function Post(props) {
                                         />
                                     </Toolbar>
                                 </AppBar>
-                                <PostContext.Provider value={{name, user, post, parentRoute}}>
+                                <PostContext.Provider value={{name, user, post, parentRoute, statusManager}}>
                                     <div className={style.content}>
-                                        <Router page={page} pages={pages} router={router}/>
+                                        <Router page={page} pages={pages} router={getPageName}/>
                                     </div>
                                     <Dialog effect={dialogEffect} />
                                 </PostContext.Provider>

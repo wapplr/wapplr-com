@@ -1,3 +1,5 @@
+import {runPostTypesConfigSync} from "../../postTypes";
+
 const titles = {
     loginTitle: "Login",
     accountTitle: "Account settings",
@@ -11,9 +13,6 @@ const titles = {
     changePasswordTitle: "Change password",
     deleteAccountTitle: "Delete account",
     homeTitle: "Home",
-    postTitle: "Post",
-    newPostTitle: "New post",
-    editPostTitle: "Edit post",
     statusBannedTitle: "Banned",
     statusDeletedTitle: "Deleted",
     statusAuthorDeletedTitle: "Author deleted",
@@ -21,21 +20,15 @@ const titles = {
     statusApprovedTitle: "Approved",
     statusFeaturedTitle: "Featured",
     statusCreatedTitle: "Created",
-    dialogDeleteEntryTitle: "Delete post",
-    dialogBanEntryTitle: "Ban post",
-    dialogApproveEntryTitle: "Approve post",
-    dialogMarkFeaturedEntryTitle: "Mark post to featured",
-    dialogRemoveMarkFeaturedEntryTitle: "Remove featured mark of post",
+    dialogDeleteEntryTitle: "Delete entry",
+    dialogBanEntryTitle: "Ban entry",
+    dialogApproveEntryTitle: "Approve entry",
+    dialogMarkFeaturedEntryTitle: "Mark entry to featured",
+    dialogRemoveMarkFeaturedEntryTitle: "Remove featured mark of entry",
     dialogDeleteAccountTitle: "Delete account",
-
-    userTitle: "User",
     userProfileTitle: "User profile",
-    editUserTitle: "Edit user",
     dashboardTitle: "Dashboard",
-    userPostsTitle: "User posts",
-    userDeletedPostsTitle: "Deleted posts",
-    myPostsTitle: "My posts",
-    myDeletedPostsTitle: "My deleted posts"
+    ...runPostTypesConfigSync({action:"getConstants", rKey:"titles"}).reduce((a, v) => {return {...a, ...v}}, {})
 };
 
 export default titles;

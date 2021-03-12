@@ -1,19 +1,20 @@
 import React, {useContext} from "react";
 
-import PostContext from "./context";
+import PostContext from "../context";
 import {WappContext} from "wapplr-react/dist/common/Wapp";
 import getUtils from "wapplr-react/dist/common/Wapp/getUtils";
-import Form from "../Form";
+import Form from "../../Form";
 
 function FeaturedForm(props) {
 
+    const postContext = useContext(PostContext);
+
     const {
         onSubmit,
-        setFormRef
+        setFormRef,
+        name = postContext.name,
+        post = postContext.post
     } = props;
-
-    const postContext = useContext(PostContext);
-    const {name, post} = postContext;
 
     const context = useContext(WappContext);
     const utils = getUtils(context);

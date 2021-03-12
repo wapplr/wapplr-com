@@ -1,3 +1,5 @@
+import {runPostTypesConfigSync} from "../../postTypes";
+
 const messages = {
     forgotPasswordSuccessMessage: "The message has been sent to your email address",
     resetPasswordSuccessMessage: "Your password has been updated",
@@ -7,11 +9,11 @@ const messages = {
     emailConfirmationSuccessMessage: "Your email has been confirmed",
     emailConfirmationSendAgainSuccessMessage: "Your email confirmation key has been sent again",
     deleteAccountSuccessMessage: "Your account has been deleted",
-    savePostSuccessMessage: "The post has been updated",
-    newPostSuccessMessage: "The new post has been saved",
-    validationPostTitle: "Minimum 1 max 250 characters",
-    validationPostSubtitle: "Minimum 1 max 250 characters",
-    validationPostContent: "Minimum 1 max 20000 characters",
+    saveEntrySuccessMessage: "The entry has been updated",
+    newEntrySuccessMessage: "The new entry has been saved",
+    validationEntryTitle: "Minimum 1 max 250 characters",
+    validationEntrySubtitle: "Minimum 1 max 250 characters",
+    validationEntryContent: "Minimum 1 max 20000 characters",
     notFoundNotAvailable: "This content is not available",
     notFoundLoginText: "Log in to your account because there are pages that can only be seen with permission",
     deleteEntrySuccess: "This entry has been deleted",
@@ -26,7 +28,8 @@ const messages = {
     removeMarkFeaturedEntryQuestion: "Are you sure want to remove featured mark of this entry?",
     deleteAccountQuestion: "Are you sure want to delete your account?",
     deleteAccountSuccess: "Your account has been deleted",
-    thereAreNoEntries:"There are no entries"
+    thereAreNoEntries:"There are no entries",
+    ...runPostTypesConfigSync({action:"getConstants", rKey:"messages"}).reduce((a, v) => {return {...a, ...v}}, {})
 };
 
 export default messages;

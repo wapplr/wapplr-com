@@ -19,7 +19,7 @@ import menus from "../../config/constants/menus";
 export default function App(props) {
 
     const context = useContext(WappContext);
-    const {wapp} = context;
+    const {wapp, res} = context;
     const utils = getUtils(context);
     const {subscribe} = props;
 
@@ -40,13 +40,18 @@ export default function App(props) {
         }
     }, [url]);
 
+    const userStatusManager = wapp.getTargetObject().postTypes.findPostType({name: "user"}).statusManager;
+    const route = res.wappResponse.route;
+    const requestPath = route.requestPath;
+
     return (
-        <AppContext.Provider value={{messages, labels, titles, routes, menus}}>
+        <AppContext.Provider value={{messages, labels, titles, routes, menus, userStatusManager}}>
             <div className={style.app}>
-                <Template url={url}>
-                    {(url.startsWith(routes.accountRoute)) ? <Account url={url}/> : null}
-                    {(url.startsWith(routes.postRoute)) ? <Post url={url}/> : null}
-                    {(url.startsWith(routes.userRoute)) ? <User /> : null}
+                <Template >
+                    {(requestPath.startsWith(routes.accountRoute)) ? <Account /> : null}
+                    {(requestPath.startsWith(routes.postRoute)) ? <Post /> : null}
+                    {(requestPath.startsWith(routes.userRoute)) ? <User /> : null}
+                    {(requestPath.startsWith(routes.documentRoute)) ? <Post name={"document"} parentRoute={routes.documentRoute}/> : null}
                 </Template>
             </div>
         </AppContext.Provider>

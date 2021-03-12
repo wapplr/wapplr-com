@@ -12,14 +12,14 @@ import SettingsIcon from "@material-ui/icons/Settings";
 function getMenu(props = {}) {
 
     const {appContext} = props;
-    const {menus, routes} = appContext;
+    const {menus, routes, userStatusManager} = appContext;
 
     return [
         {
             name: menus.loginMenu,
             href: "/login",
             role: function (p) {
-                return !(p?.user?._id);
+                return !(p.user?._id);
             },
             Icon: AccountCircleIcon
         },
@@ -27,7 +27,7 @@ function getMenu(props = {}) {
             name: menus.signupMenu,
             href: "/signup",
             role: function (p) {
-                return !(p?.user?._id);
+                return !(p.user?._id);
             },
             Icon: PersonAddIcon
         },
@@ -38,7 +38,7 @@ function getMenu(props = {}) {
             },
             role: function (p) {
                 if (!p.page){return false;}
-                return p?.user?._id && p?.user?._status_isNotDeleted;
+                return p.user?._id && p.user[userStatusManager._status_isNotDeleted];
             },
             Icon: SettingsIcon,
             disableParentRoute: true
@@ -46,49 +46,49 @@ function getMenu(props = {}) {
         {
             name: menus.changeData, href: "/changedata",
             role: function (p) {
-                return p?.user?._id && p?.user?._status_isNotDeleted;
+                return p.user?._id && p.user[userStatusManager._status_isNotDeleted];
             },
             Icon: PersonIcon
         },
         {
             name: menus.changeEmail, href: "/changeemail",
             role: function (p) {
-                return p?.user?._id && p?.user?._status_isNotDeleted;
+                return p.user?._id && p.user[userStatusManager._status_isNotDeleted];
             },
             Icon: EmailIcon
         },
         {
             name: menus.emailConfirmation, href: "/emailconfirmation",
             role: function (p) {
-                return p?.user?._id && !p?.user?.emailConfirmed && p?.user?._status_isNotDeleted;
+                return p.user?._id && !p.user?.emailConfirmed && p.user[userStatusManager._status_isNotDeleted];
             },
             Icon: CheckCircleIcon
         },
         {
             name: menus.changePassword, href: "/changepassword",
             role: function (p) {
-                return p?.user?._id && p?.user?._status_isNotDeleted;
+                return p.user?._id && p.user[userStatusManager._status_isNotDeleted];
             },
             Icon: LockIcon
         },
         {
             name: menus.forgotPasswordMenu, href: "/forgotpassword",
             role: function (p) {
-                return p?.user?._status_isNotDeleted || !(p?.user?._id)
+                return (p.user && p.user[userStatusManager._status_isNotDeleted]) || !(p.user?._id)
             },
             Icon: HelpIcon,
         },
         {
             name: menus.deleteAccount, href: "/deleteaccount",
             role: function (p) {
-                return p?.user?._id && p?.user?._status_isNotDeleted;
+                return p.user?._id && p.user[userStatusManager._status_isNotDeleted];
             },
             Icon: DeleteIcon
         },
         {
             name: menus.logoutMenu, href: "/logout",
             role: function (p) {
-                return p?.user?._id;
+                return p.user?._id;
             },
             Icon: ExitToAppIcon
         },

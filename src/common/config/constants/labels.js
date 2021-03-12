@@ -1,3 +1,5 @@
+import {runPostTypesConfigSync} from "../../postTypes";
+
 const labels = {
     logoutSubmitLabel: "Logout",
     forgotPasswordSubmitLabel: "Send reset key",
@@ -7,12 +9,11 @@ const labels = {
     emailConfirmationSubmitLabel: "Confirm email",
     deleteAccountLabel: "Delete account",
     emailConfirmationSendAgainSubmitLabel: "Send confirmation key to new email address again",
-    postTitleLabel: "Title",
-    postSubtitleLabel: "Subtitle",
-    postContentLabel: "Content",
-    newPostSubmitLabel: "Save",
-    savePostSubmitLabel: "Save",
-    restorePostSubmitLabel: "Restore",
+    entryTitleLabel: "Title",
+    entrySubtitleLabel: "Subtitle",
+    entryContentLabel: "Content",
+    newEntrySubmitLabel: "Save",
+    restoreEntrySubmitLabel: "Restore",
     notFoundButtonBack: "Previous page",
     notFoundButtonHome: "Home page",
     notFoundButtonLogin: "Login",
@@ -23,6 +24,7 @@ const labels = {
     approveText: "Approve",
     markText: "Mark",
     removeMarkText: "Remove mark",
+    ...runPostTypesConfigSync({action:"getConstants", rKey:"labels"}).reduce((a, v) => {return {...a, ...v}}, {})
 };
 
 export default labels;

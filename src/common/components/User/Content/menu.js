@@ -30,6 +30,29 @@ function getMenu(props = {}) {
             },
             Icon: DescriptionIcon,
         },
+        {
+            name: menus.newDocumentMenu,
+            href: routes.documentRoute + "/new",
+            role: function (p) {
+                const isAuthor = ((p?.user?._id && p?.user?._id === p?.post?._author) || (p?.user?._id && p?.user?._id === p?.post?._author?._id));
+                return isAuthor;
+            },
+            Icon: PostAddIcon,
+            disableParentRoute: true
+        },
+        {
+            name: function (p) {
+                const isAuthor = ((p?.user?._id && p?.user?._id === p?.post?._author) || (p?.user?._id && p?.user?._id === p?.post?._author?._id));
+                return (isAuthor) ? menus.myDocumentsMenu : menus.userDocumentsMenu;
+            },
+            href: function (p) {
+                return (p?.post?._id) ? "/"+p.post._id + routes.userDocumentsRoute : routes.userDocumentsRoute;
+            },
+            role: function (p) {
+                return true;
+            },
+            Icon: DescriptionIcon,
+        },
     ];
 
 }

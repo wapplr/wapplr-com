@@ -8,16 +8,27 @@ import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import AppBar from "@material-ui/core/AppBar";
 import Paper from "@material-ui/core/Paper";
+import IconButton from "@material-ui/core/IconButton";
+import CancelIcon from "@material-ui/icons/Cancel";
+
+import getStatus from "../../utils/getStatus";
+import getUserName from "../../utils/getUserName";
 
 import {withMaterialStyles} from "../Template/withMaterial";
 
 import AppContext from "../App/context";
 import Menu from "../Menu";
+import NotFound from "../NotFound";
+import Avatar from "../Avatar/me";
 
 import style from "./style.css";
 import materialStyle from "./materialStyle";
 
 import AccountContext from "./context";
+import {getPageName} from "./utils";
+import getMenu from "./menu";
+
+import Router from "./Router";
 
 import Login from "./Login";
 import Signup from "./Signup";
@@ -30,13 +41,6 @@ import ChangePassword from "./ChangePassword";
 import EmailConfirmation from "./EmailConfirmation";
 import DeleteAccount from "./DeleteAccount";
 import Logout from "./Logout";
-
-import getMenu from "./menu";
-import NotFound from "../NotFound";
-import Avatar from "../Avatar/me";
-import getUserName from "../../utils/getUserName";
-import IconButton from "@material-ui/core/IconButton";
-import CancelIcon from "@material-ui/icons/Cancel";
 
 const pages = {
     forgotpassword: ForgotPassword,
@@ -52,47 +56,6 @@ const pages = {
     logout: Logout
 };
 
-function router({user, page}) {
-
-    function renderWithUser() {
-        if (!page) {
-            return "settings";
-        }
-        if (["forgotpassword", "resetpassword", "changedata", "changeemail", "changepassword", "emailconfirmation", "logout", "login", "signup", "deleteaccount"].indexOf(page) > -1){
-            if (page === "login" || page === "signup"){
-                return "settings"
-            }
-            return page;
-        }
-        return null;
-    }
-
-    function renderWithoutUser() {
-        if (!page) {
-            return "login";
-        }
-        if (["login", "signup", "forgotpassword", "resetpassword", "emailconfirmation"].indexOf(page) > -1){
-            return page;
-        }
-        return null;
-    }
-
-    return (!user) ? renderWithoutUser() : renderWithUser();
-
-}
-
-function Router(props) {
-
-    const accountContext = useContext(AccountContext);
-    const {user} = accountContext;
-    const {page} = props;
-
-    const pageName = router({user, page});
-    const Page = (pageName) ? pages[pageName] : null;
-
-    return (Page) ? <Page /> : null;
-}
-
 function Account(props) {
 
     const appContext = useContext(AppContext);
@@ -100,8 +63,7 @@ function Account(props) {
 
     const {
         parentRoute = appContext.routes.accountRoute,
-        // eslint-disable-next-line no-unused-vars
-        url
+        name = "user"
     } = props;
 
     const utils = getUtils(context);
@@ -128,7 +90,7 @@ function Account(props) {
     function getTitle() {
 
         const page = res.wappResponse.route.params.page;
-        const pageName = router({user, page});
+        const pageName = getPageName({user, page});
 
         if (pageName === "login") {
             return appContext.titles.loginTitle;
@@ -179,43 +141,13 @@ function Account(props) {
 
     const page = res.wappResponse.route.params.page;
 
-    const pageName = router({user, page});
+    const pageName = getPageName({user, page});
 
     if (!pageName){
         res.wappResponse.status(404)
     }
 
     const userName = getUserName(user);
-
-    function getStatus() {
-
-        const isNotDeleted = user?._status_isNotDeleted;
-        const isBanned = user?._status_isBanned;
-        const isValidated = user?._status_isValidated;
-        const isApproved = user?._status_isApproved;
-        const isFeatured = user?._status_isFeatured;
-        const isAuthor = ((user?._id && user?._id === user?._author) || (user?._id && user?._id === user?._author?._id));
-        const isAdmin = user?._status_isFeatured;
-        const isAuthorOrAdmin = !!(isAuthor || isAdmin);
-
-        if (isAuthorOrAdmin && page !== "new"){
-
-            return (isBanned && isAdmin) ?
-                appContext.titles.statusBannedTitle :
-                (!isNotDeleted) ?
-                    appContext.titles.statusDeletedTitle :
-                    (!isValidated) ?
-                        appContext.titles.statusMissingDataTitle :
-                        (isFeatured && isAdmin) ?
-                            appContext.titles.statusFeaturedTitle :
-                            (isApproved && isAdmin) ?
-                                appContext.titles.statusApprovedTitle :
-                                (isAdmin) ? appContext.titles.statusCreatedTitle : null
-
-        }
-
-        return null;
-    }
 
     const avatarClick = (e) => {
         wapp.client.history.push({pathname: appContext.routes.userRoute + "/" + user._id, search:"", hash:""})
@@ -224,6 +156,8 @@ function Account(props) {
     const backClick = (e) => {
         wapp.client.history.push({pathname: (pageName === "settings") ? appContext.routes.userRoute + "/" + user._id : appContext.routes.accountRoute, search:"", hash:""})
     };
+
+    const statusManager = wapp.getTargetObject().postTypes.findPostType({name: name}).statusManager;
 
     return (
         <>
@@ -244,10 +178,10 @@ function Account(props) {
                                                         {userName}
                                                     </Typography>
                                                 </div>
-                                                {(getStatus()) ?
+                                                {(getStatus({user, post:user, appContext, statusManager})) ?
                                                     <div className={style.status}>
                                                         <Typography variant={"subtitle1"} color={"textSecondary"} >
-                                                            {getStatus()}
+                                                            {getStatus({user, post:user, appContext, statusManager})}
                                                         </Typography>
                                                     </div>
                                                     :
@@ -297,9 +231,9 @@ function Account(props) {
                                     null
                                 }
                             </AppBar>
-                            <AccountContext.Provider value={{user, parentRoute, name:"user", page}}>
+                            <AccountContext.Provider value={{user, parentRoute, name, page, statusManager}}>
                                 <div className={style.content}>
-                                    <Router page={page}/>
+                                    <Router page={page} router={getPageName} pages={pages}/>
                                 </div>
                             </AccountContext.Provider>
                         </Paper>

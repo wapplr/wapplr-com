@@ -1,7 +1,7 @@
-import getDefaultStatusManager from "./index";
+import defaultPostTypeConfig from "../post";
 
 export default function getStatusManager(p = {}) {
-    return getDefaultStatusManager({
+    return defaultPostTypeConfig.getStatusManager({
         ...p,
         config: {
             requiredDataForStatus: {
@@ -12,4 +12,3 @@ export default function getStatusManager(p = {}) {
         },
     })
 }
-

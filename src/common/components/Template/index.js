@@ -23,7 +23,6 @@ import CloseIcon from '@material-ui/icons/Close';
 
 import {storage} from "../../utils/localStorage";
 
-
 import AppContext from "../App/context";
 import Avatar from "../Avatar/me";
 
@@ -41,8 +40,6 @@ function Template(props) {
         children,
         title = "WAPPLR",
         materialStyle,
-        // eslint-disable-next-line no-unused-vars
-        url,
     } = props;
     //const materialTheme = useTheme();
 
@@ -166,10 +163,16 @@ function Template(props) {
                     >
                         {(open) ? <CloseIcon /> : <MenuIcon />}
                     </IconButton>
-                    <div className={style.logo}>
+                    <div
+                        className={style.logo}
+                        onClick={(e) => onClick(e, {href:"/"})}
+                    >
                         <Logo />
                     </div>
-                    <div className={style.title}>
+                    <div
+                        className={style.title}
+                        onClick={(e) => onClick(e, {href:"/"})}
+                    >
                         <Typography variant={"h6"} noWrap>
                             {title}
                         </Typography>

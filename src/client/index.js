@@ -8,8 +8,10 @@ import wapplrPostTypes from "wapplr-posttypes";
 import setContents from "../common/setContents";
 
 import {getConfig as getCommonConfig} from "../common/config";
-import getPostStatusManager from "../common/config/statuses/post";
-import getUserStatusManager from "../common/config/statuses/user";
+
+import initUser from "./postTypes/user";
+import initPost from "./postTypes/post";
+import initDocument from "./postTypes/document";
 
 export function getConfig(p = {}) {
 
@@ -47,19 +49,9 @@ export default async function createClient(p) {
     wapplrReact({wapp});
     setContents({wapp});
 
-    const authSettings = {
-        name: "user",
-        addIfThereIsNot: true,
-        statusManager: getUserStatusManager(),
-    };
-
-    wapp.client.authentications.getAuthentication(authSettings);
-
-    wapp.client.postTypes.getPostType({
-        name: "post",
-        addIfThereIsNot: true,
-        statusManager: getPostStatusManager(),
-    });
+    initUser({wapp});
+    initPost({wapp});
+    initDocument({wapp});
 
     return wapp;
 }
